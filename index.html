@@ -1,0 +1,3601 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="คู่มืออ่านสอบ SQL CASE WHEN และ Trigger ฉบับสมบูรณ์ พร้อมโค้ดตัวอย่าง ผลลัพธ์ แบบฝึกหัด และจุดออกสอบ">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%234f46e5'/%3E%3Ctext x='50' y='66' font-size='42' text-anchor='middle' fill='white' font-family='monospace'%3ESQL%3C/text%3E%3C/svg%3E">
+<title>SQL CASE WHEN &amp; Trigger — คู่มืออ่านสอบฉบับสมบูรณ์</title>
+<style>
+  /* ===== Design tokens ===== */
+  :root {
+    --bg: #f4f6fb;
+    --bg-soft: #eef1f8;
+    --surface: #ffffff;
+    --surface-2: #f8f9fd;
+    --ink: #162033;
+    --ink-2: #33405a;
+    --muted: #65708a;
+    --line: #e1e6f0;
+    --line-strong: #cbd3e3;
+    --brand: #4f46e5;
+    --brand-2: #0f766e;
+    --brand-3: #7c3aed;
+    --accent: #d97706;
+    --danger: #dc2626;
+    --success: #15803d;
+    --code-bg: #0e1628;
+    --code-bg-2: #111c33;
+    --code-ink: #dbe4f5;
+    --shadow: 0 12px 40px rgba(22, 32, 51, .08);
+    --shadow-sm: 0 2px 8px rgba(22, 32, 51, .06);
+    --radius: 18px;
+    --radius-sm: 12px;
+    --max: 1180px;
+  }
+
+  html[data-theme="dark"] {
+    --bg: #0a0f1d;
+    --bg-soft: #0f172a;
+    --surface: #111a2e;
+    --surface-2: #16213a;
+    --ink: #e9eefb;
+    --ink-2: #c9d4ea;
+    --muted: #9aa8c4;
+    --line: #22304a;
+    --line-strong: #334463;
+    --brand: #818cf8;
+    --brand-2: #2dd4bf;
+    --brand-3: #c084fc;
+    --accent: #fbbf24;
+    --danger: #f87171;
+    --success: #4ade80;
+    --code-bg: #070c17;
+    --code-bg-2: #0b1324;
+    --code-ink: #dbe4f5;
+    --shadow: 0 16px 50px rgba(0, 0, 0, .35);
+    --shadow-sm: 0 2px 10px rgba(0, 0, 0, .25);
+  }
+
+  /* ===== Base ===== */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Sarabun", "Noto Sans Thai", "Leelawadee UI", "Tahoma", sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: rgba(79, 70, 229, .22); }
+  a { color: var(--brand); text-decoration-thickness: .08em; text-underline-offset: .18em; }
+  a:hover { color: var(--brand-3); }
+  h1, h2, h3, h4 {
+    line-height: 1.3;
+    color: var(--ink);
+    margin: 0 0 .6rem;
+    letter-spacing: -.01em;
+  }
+  h2 { font-size: clamp(1.55rem, 2.5vw, 2.1rem); }
+  h3 { font-size: 1.24rem; margin-top: 1.8rem; }
+  h4 { font-size: 1.04rem; margin-top: 1.2rem; }
+  p { margin: 0 0 1rem; }
+  ul, ol { margin: .5rem 0 1rem; padding-left: 1.35rem; }
+  li { margin: .35rem 0; }
+  strong { color: var(--ink); }
+  small { color: var(--muted); }
+  img, svg { max-width: 100%; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .container { width: min(var(--max), calc(100% - 2rem)); margin-inline: auto; }
+  .layout > *, .grid-2 > *, .grid-3 > *, .card, .code-block, .table-wrap, .section, main { min-width: 0; }
+  .skip-link {
+    position: absolute; left: -999px; top: 0; z-index: 200;
+    background: var(--surface); color: var(--ink);
+    padding: .6rem .9rem; border-radius: 0 0 10px 0; font-weight: 700;
+  }
+  .skip-link:focus { left: 0; }
+
+  /* ===== Reading progress ===== */
+  .reading-progress {
+    position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 100;
+    background: transparent; pointer-events: none;
+  }
+  #readingProgress {
+    display: block; height: 100%; width: 0;
+    background: linear-gradient(90deg, #6366f1, #2dd4bf);
+    transition: width .1s linear;
+  }
+
+  /* ===== Hero ===== */
+  .hero {
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(900px 500px at 82% -10%, rgba(45, 212, 191, .18), transparent 60%),
+      radial-gradient(700px 500px at 8% 110%, rgba(99, 102, 241, .22), transparent 65%),
+      linear-gradient(135deg, #0b1020 0%, #141a31 52%, #0d2630 100%);
+    color: #f8fafc;
+    padding: 2.2rem 0 0;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, .045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, .045) 1px, transparent 1px);
+    background-size: 42px 42px;
+    -webkit-mask-image: linear-gradient(to bottom, #000, transparent 88%);
+    mask-image: linear-gradient(to bottom, #000, transparent 88%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: "";
+    position: absolute; width: 520px; height: 520px; right: -140px; top: -180px;
+    background: radial-gradient(circle, rgba(45, 212, 191, .22), transparent 65%);
+    filter: blur(24px); pointer-events: none;
+  }
+  .hero-inner {
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: 1.12fr .88fr; gap: 3rem;
+    align-items: center; padding: 2.8rem 0 3.4rem;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: .55rem;
+    font-size: .76rem; letter-spacing: .16em; text-transform: uppercase;
+    color: #a5b4fc; font-weight: 800;
+  }
+  .eyebrow .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #2dd4bf;
+    box-shadow: 0 0 0 4px rgba(45, 212, 191, .15);
+  }
+  .hero h1 {
+    color: #fff;
+    font-size: clamp(2.7rem, 5.3vw, 4.9rem);
+    letter-spacing: -.045em;
+    margin: 1rem 0 1rem;
+  }
+  .grad {
+    background: linear-gradient(90deg, #a5b4fc 0%, #67e8f9 100%);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+  .grad-2 {
+    background: linear-gradient(90deg, #5eead4 0%, #a7f3d0 100%);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+  .hero-lead {
+    color: #c7d2e8; font-size: 1.06rem; max-width: 62ch; margin-bottom: 1.25rem;
+  }
+  .hero-badges { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.1rem 0 1.55rem; }
+  .hero-badges span {
+    border: 1px solid rgba(255, 255, 255, .16);
+    background: rgba(255, 255, 255, .06);
+    color: #dbe4f5; padding: .3rem .7rem; border-radius: 999px;
+    font-size: .77rem; font-weight: 600;
+  }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: .7rem; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+    border: 1px solid transparent; border-radius: 999px;
+    padding: .7rem 1.15rem; font: inherit; font-weight: 700; font-size: .92rem;
+    cursor: pointer; text-decoration: none; transition: transform .18s ease, background .18s ease, border-color .18s ease, filter .18s ease;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #6366f1, #0d9488);
+    color: #fff; box-shadow: 0 8px 24px rgba(79, 70, 229, .35);
+  }
+  .btn-primary:hover { transform: translateY(-1px); color: #fff; filter: brightness(1.07); }
+  .btn-ghost {
+    background: rgba(255, 255, 255, .07); border-color: rgba(255, 255, 255, .2); color: #e2e8f0;
+  }
+  .btn-ghost:hover { background: rgba(255, 255, 255, .13); color: #fff; }
+  .btn-light {
+    background: var(--surface); color: var(--ink); border-color: var(--line);
+  }
+  .btn-light:hover { background: var(--surface-2); color: var(--brand); }
+  .btn-sm { padding: .45rem .8rem; font-size: .8rem; }
+
+  .hero-card {
+    background: linear-gradient(180deg, rgba(17, 26, 46, .94), rgba(8, 14, 26, .97));
+    border: 1px solid rgba(255, 255, 255, .13);
+    border-radius: 22px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .38);
+    transform: rotate(1deg);
+  }
+  .hero-card-top {
+    display: flex; align-items: center; gap: .4rem;
+    padding: .75rem 1rem; border-bottom: 1px solid rgba(255, 255, 255, .08);
+    color: #8fa0c0; font-size: .7rem; font-family: "Cascadia Code", Consolas, monospace;
+  }
+  .traffic { width: 8px; height: 8px; border-radius: 50%; background: #f87171; }
+  .traffic:nth-child(2) { background: #fbbf24; }
+  .traffic:nth-child(3) { background: #34d399; }
+  .hero-card-top .file { margin-left: .35rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hero-formula { padding: 1.35rem 1.35rem 1rem; }
+  .formula-row {
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: .78rem; line-height: 1.6; color: #dbe4f5;
+    background: rgba(255, 255, 255, .045);
+    border: 1px solid rgba(255, 255, 255, .09);
+    padding: .75rem .8rem; border-radius: 12px;
+  }
+  .pill { color: #a5b4fc; font-weight: 800; }
+  .pill-alt { color: #5eead4; font-weight: 800; }
+  .formula-plus, .formula-eq {
+    text-align: center; color: #64748b; font-weight: 800; margin: .3rem 0;
+    font-family: "Cascadia Code", Consolas, monospace;
+  }
+  .formula-result {
+    text-align: center; color: #082f2b;
+    background: linear-gradient(135deg, #a7f3d0, #67e8f9);
+    padding: .7rem; border-radius: 12px; font-weight: 800; font-size: .88rem;
+  }
+  .hero-mini {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem;
+    padding: 0 1.35rem 1.35rem;
+  }
+  .hero-mini div {
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 10px; padding: .55rem; font-size: .66rem; color: #a9b7d1; line-height: 1.45;
+  }
+  .hero-mini span {
+    display: block; color: #e2e8f0; font-family: "Cascadia Code", Consolas, monospace;
+    font-weight: 700; font-size: .72rem; margin-bottom: .12rem;
+  }
+  .hero-stats {
+    position: relative; z-index: 1;
+    border-top: 1px solid rgba(255, 255, 255, .1);
+    background: rgba(0, 0, 0, .18);
+  }
+  .hero-stats-inner { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .stat { padding: .95rem 1.2rem; border-right: 1px solid rgba(255, 255, 255, .08); }
+  .stat:last-child { border-right: 0; }
+  .stat b { display: block; color: #fff; font-size: 1.22rem; line-height: 1.2; }
+  .stat span { color: #94a3b8; font-size: .73rem; }
+
+  /* ===== Layout / sidebar ===== */
+  .layout {
+    display: grid; grid-template-columns: 252px minmax(0, 1fr); gap: 2.5rem;
+    width: min(var(--max), calc(100% - 2rem));
+    margin: 2.4rem auto 5rem; align-items: start;
+  }
+  .sidebar { position: sticky; top: 1.4rem; }
+  .sidebar-inner {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: .95rem; box-shadow: var(--shadow-sm);
+    max-height: calc(100vh - 2.8rem); overflow: auto;
+  }
+  .toc-head {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .12em;
+    color: var(--muted); font-weight: 800;
+    padding: .25rem .45rem .6rem; border-bottom: 1px solid var(--line); margin-bottom: .45rem;
+  }
+  #readPercent { color: var(--brand); font-family: "Cascadia Code", Consolas, monospace; }
+  .toc { display: flex; flex-direction: column; gap: .1rem; }
+  .toc a {
+    display: flex; gap: .5rem; align-items: baseline;
+    padding: .42rem .55rem; border-radius: 9px;
+    color: var(--ink-2); text-decoration: none; font-size: .84rem; line-height: 1.45;
+    border-left: 2px solid transparent;
+    transition: background .15s ease, color .15s ease;
+  }
+  .toc a .n {
+    color: var(--muted); font-family: "Cascadia Code", Consolas, monospace;
+    font-size: .66rem; min-width: 1.25rem;
+  }
+  .toc a:hover { background: var(--surface-2); color: var(--brand); }
+  .toc a.active {
+    background: rgba(79, 70, 229, .09); color: var(--brand);
+    border-left-color: var(--brand); font-weight: 700;
+  }
+  .toc a.sub { padding-left: 1.65rem; font-size: .78rem; }
+  .side-note {
+    margin-top: .9rem; padding: .8rem; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(79, 70, 229, .08), rgba(13, 148, 136, .08));
+    border: 1px solid var(--line); font-size: .76rem; color: var(--muted); line-height: 1.55;
+  }
+  .side-note strong { color: var(--ink-2); }
+
+  /* ===== Sections ===== */
+  main { min-width: 0; }
+  .section {
+    scroll-margin-top: 1.4rem;
+    padding: 1.1rem 0 3.2rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .section:last-child { border-bottom: 0; }
+  .section-head { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.5rem; }
+  .section-head > div { min-width: 0; }
+  .section-sub { overflow-wrap: anywhere; }
+  .section-num {
+    flex: 0 0 auto; width: 2.6rem; height: 2.6rem;
+    display: grid; place-items: center; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(79, 70, 229, .13), rgba(13, 148, 136, .13));
+    color: var(--brand); font-family: "Cascadia Code", Consolas, monospace;
+    font-weight: 800; font-size: .88rem; border: 1px solid var(--line);
+  }
+  .kicker {
+    margin: 0 0 .18rem; color: var(--brand-2); font-size: .73rem;
+    text-transform: uppercase; letter-spacing: .14em; font-weight: 800;
+  }
+  .section-sub { color: var(--muted); margin: .2rem 0 0; max-width: 78ch; }
+  .section h3 { scroll-margin-top: 1.3rem; }
+
+  /* ===== Cards / grids ===== */
+  .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 1.2rem; box-shadow: var(--shadow-sm);
+  }
+  .card h3, .card h4 { margin-top: 0; }
+  .card p:last-child, .card ul:last-child, .card ol:last-child { margin-bottom: 0; }
+  .card-icon {
+    width: 2.2rem; height: 2.2rem; border-radius: 10px;
+    display: grid; place-items: center; margin-bottom: .7rem;
+    background: rgba(79, 70, 229, .1); color: var(--brand);
+    font-weight: 800; font-family: "Cascadia Code", Consolas, monospace;
+  }
+  .card.teal .card-icon { background: rgba(13, 148, 136, .12); color: var(--brand-2); }
+  .card.amber .card-icon { background: rgba(217, 119, 6, .13); color: var(--accent); }
+  .card.rose .card-icon { background: rgba(220, 38, 38, .11); color: var(--danger); }
+
+  /* ===== Callouts ===== */
+  .callout {
+    display: flex; gap: .8rem; padding: 1rem 1.05rem;
+    border-radius: 14px; border: 1px solid var(--line);
+    background: var(--surface); margin: 1.2rem 0;
+    border-left: 4px solid var(--brand);
+  }
+  .callout .ci {
+    flex: 0 0 auto; width: 1.65rem; height: 1.65rem; border-radius: 50%;
+    display: grid; place-items: center; font-weight: 900; font-size: .78rem;
+    background: rgba(79, 70, 229, .12); color: var(--brand);
+    margin-top: .08rem;
+  }
+  .callout > div:last-child { min-width: 0; }
+  .callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+  .callout.exam {
+    border-left-color: var(--accent);
+    background: linear-gradient(135deg, rgba(245, 158, 11, .09), transparent 62%), var(--surface);
+  }
+  .callout.exam .ci { background: rgba(245, 158, 11, .17); color: var(--accent); }
+  .callout.warn {
+    border-left-color: #f97316;
+    background: linear-gradient(135deg, rgba(249, 115, 22, .09), transparent 62%), var(--surface);
+  }
+  .callout.warn .ci { background: rgba(249, 115, 22, .16); color: #ea580c; }
+  .callout.danger {
+    border-left-color: var(--danger);
+    background: linear-gradient(135deg, rgba(220, 38, 38, .08), transparent 62%), var(--surface);
+  }
+  .callout.danger .ci { background: rgba(220, 38, 38, .14); color: var(--danger); }
+  .callout.success {
+    border-left-color: var(--success);
+    background: linear-gradient(135deg, rgba(21, 128, 61, .08), transparent 62%), var(--surface);
+  }
+  .callout.success .ci { background: rgba(21, 128, 61, .14); color: var(--success); }
+  .callout.info {
+    border-left-color: #0284c7;
+    background: linear-gradient(135deg, rgba(2, 132, 199, .08), transparent 62%), var(--surface);
+  }
+  .callout.info .ci { background: rgba(2, 132, 199, .14); color: #0284c7; }
+
+  .memory-box {
+    background: linear-gradient(135deg, rgba(79, 70, 229, .09), rgba(13, 148, 136, .09));
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 1.15rem 1.25rem; margin: 1.2rem 0;
+  }
+  .memory-box h4 { margin-top: 0; }
+  .memory-box p:last-child, .memory-box ul:last-child { margin-bottom: 0; }
+
+  /* ===== Code ===== */
+  .code-block {
+    margin: 1.15rem 0; border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, .22);
+    background: var(--code-bg); box-shadow: var(--shadow-sm);
+  }
+  .code-head {
+    display: flex; align-items: center; gap: .55rem;
+    padding: .55rem .8rem; background: var(--code-bg-2);
+    border-bottom: 1px solid rgba(148, 163, 184, .16);
+  }
+  .code-lang {
+    font-family: "Cascadia Code", Consolas, monospace; font-size: .66rem;
+    font-weight: 800; letter-spacing: .08em; color: #5eead4;
+    background: rgba(45, 212, 191, .1); border: 1px solid rgba(45, 212, 191, .2);
+    padding: .15rem .4rem; border-radius: 5px; white-space: nowrap;
+  }
+  .code-title {
+    color: #94a3b8; font-size: .71rem; font-family: "Cascadia Code", Consolas, monospace;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .copy-btn {
+    margin-left: auto; border: 1px solid rgba(148, 163, 184, .25);
+    background: rgba(148, 163, 184, .08); color: #cbd5e1;
+    font: inherit; font-size: .69rem; font-weight: 700;
+    padding: .28rem .55rem; border-radius: 7px; cursor: pointer;
+    display: inline-flex; gap: .3rem; align-items: center; white-space: nowrap;
+  }
+  .copy-btn:hover { background: rgba(148, 163, 184, .16); color: #fff; }
+  .copy-btn.copied { color: #5eead4; border-color: rgba(45, 212, 191, .4); }
+  pre { margin: 0; padding: 1rem 1.1rem; overflow: auto; background: transparent; }
+  pre code {
+    font-family: "Cascadia Code", "Consolas", "Courier New", monospace;
+    font-size: .82rem; line-height: 1.62; color: var(--code-ink);
+    white-space: pre; tab-size: 2;
+    font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0;
+  }
+  .tok-kw { color: #c4b5fd; font-weight: 700; }
+  .tok-str { color: #86efac; }
+  .tok-num { color: #fca5a5; }
+  .tok-com { color: #64748b; font-style: italic; }
+  .tok-fn { color: #67e8f9; }
+  .tok-row { color: #fbbf24; font-weight: 700; }
+  pre::-webkit-scrollbar { height: 8px; width: 8px; }
+  pre::-webkit-scrollbar-thumb { background: #334155; border-radius: 99px; }
+  pre::-webkit-scrollbar-track { background: transparent; }
+  :not(pre) > code {
+    background: var(--surface-2); border: 1px solid var(--line);
+    padding: .08rem .34rem; border-radius: 5px;
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: .86em; color: var(--brand-3);
+    font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* ===== Tables ===== */
+  .table-wrap {
+    overflow: auto; border: 1px solid var(--line); border-radius: 14px;
+    margin: 1rem 0 1.4rem; background: var(--surface);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; min-width: 520px; }
+  caption {
+    caption-side: top; text-align: left; padding: .8rem 1rem .15rem;
+    color: var(--muted); font-size: .76rem; font-weight: 700;
+  }
+  thead th {
+    background: var(--surface-2); color: var(--ink-2); text-align: left;
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .04em;
+    padding: .62rem .8rem; border-bottom: 1px solid var(--line-strong); white-space: nowrap;
+  }
+  tbody td { padding: .52rem .8rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: rgba(79, 70, 229, .04); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.mono, th.mono { font-family: "Cascadia Code", Consolas, monospace; font-size: .78rem; }
+  .table-note { color: var(--muted); font-size: .76rem; margin: -.6rem 0 1.2rem; }
+
+  /* ===== Badges ===== */
+  .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 2rem; padding: .1rem .5rem; border-radius: 999px;
+    font-size: .7rem; font-weight: 800; line-height: 1.55; white-space: nowrap;
+  }
+  .badge-a, .badge-available, .badge-done { background: #dcfce7; color: #166534; }
+  .badge-b { background: #dbeafe; color: #1e40af; }
+  .badge-c, .badge-waiting, .badge-low { background: #fef3c7; color: #92400e; }
+  .badge-d { background: #ffedd5; color: #9a3412; }
+  .badge-f, .badge-out, .badge-urgent { background: #fee2e2; color: #991b1b; }
+  .badge-vip { background: #ede9fe; color: #5b21b6; }
+  .badge-gold { background: #fef3c7; color: #92400e; }
+  .badge-standard { background: #e2e8f0; color: #334155; }
+  .badge-neutral { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+
+  /* ===== Details / answers ===== */
+  details.answer, details.qa {
+    margin: 1rem 0; border: 1px solid var(--line); border-radius: 14px;
+    background: var(--surface); overflow: hidden;
+  }
+  details.answer > summary, details.qa > summary {
+    cursor: pointer; list-style: none; padding: .85rem 1rem;
+    font-weight: 700; color: var(--brand); display: flex; align-items: center; gap: .6rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, .06), transparent);
+  }
+  details.answer > summary::-webkit-details-marker,
+  details.qa > summary::-webkit-details-marker { display: none; }
+  details.answer > summary::before, details.qa > summary::before {
+    content: "+"; flex: 0 0 auto;
+    width: 1.4rem; height: 1.4rem; border-radius: 50%;
+    background: rgba(79, 70, 229, .12); display: grid; place-items: center;
+    font-weight: 900; line-height: 1;
+  }
+  details.answer[open] > summary::before, details.qa[open] > summary::before { content: "−"; }
+  .answer-body { padding: 0 1rem 1rem; border-top: 1px solid var(--line); }
+  .answer-body > :first-child { margin-top: 1rem; }
+  .ans-tag {
+    display: inline-block; font-size: .66rem; font-weight: 800; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--brand-2);
+    background: rgba(13, 148, 136, .1); border: 1px solid rgba(13, 148, 136, .16);
+    padding: .1rem .42rem; border-radius: 5px; margin-right: .3rem;
+  }
+
+  /* ===== Steps / flow ===== */
+  .flow {
+    display: flex; flex-direction: column; gap: .45rem;
+    margin: 1.1rem 0; padding: 1rem;
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  }
+  .flow-step {
+    display: flex; gap: .65rem; align-items: flex-start;
+    padding: .55rem .7rem; border-radius: 10px; background: var(--surface-2);
+    border: 1px solid var(--line); font-size: .88rem;
+  }
+  .flow-step .fnum {
+    flex: 0 0 auto; width: 1.45rem; height: 1.45rem; border-radius: 6px;
+    display: grid; place-items: center; font-family: "Cascadia Code", Consolas, monospace;
+    font-size: .68rem; font-weight: 800; color: var(--brand);
+    background: rgba(79, 70, 229, .1);
+  }
+  .flow-arrow { text-align: center; color: var(--muted); font-size: .8rem; line-height: 1; }
+  .flow-result {
+    background: rgba(21, 128, 61, .08); border-color: rgba(21, 128, 61, .2);
+  }
+  .flow-result .fnum { background: rgba(21, 128, 61, .14); color: var(--success); }
+  .flow-stop {
+    background: rgba(245, 158, 11, .08); border-color: rgba(245, 158, 11, .22);
+  }
+  .flow-stop .fnum { background: rgba(245, 158, 11, .16); color: var(--accent); }
+
+  /* ===== Practice ===== */
+  .practice-toolbar {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: .8rem; flex-wrap: wrap; margin: 1rem 0 1.2rem;
+    padding: .8rem .9rem; border: 1px dashed var(--line-strong);
+    border-radius: 12px; background: var(--surface-2);
+  }
+  .practice-toolbar .pt-label { font-size: .82rem; color: var(--muted); font-weight: 700; }
+  .practice-toolbar .pt-actions { display: flex; gap: .45rem; flex-wrap: wrap; }
+
+  .lab {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 1.2rem; margin: 1rem 0; box-shadow: var(--shadow-sm);
+  }
+  .lab-head { display: flex; gap: .65rem; align-items: flex-start; margin-bottom: .7rem; }
+  .lab-num {
+    flex: 0 0 auto; width: 2rem; height: 2rem; border-radius: 8px;
+    display: grid; place-items: center; font-family: "Cascadia Code", Consolas, monospace;
+    font-size: .72rem; font-weight: 800; color: var(--brand);
+    background: rgba(79, 70, 229, .1); border: 1px solid var(--line);
+  }
+  .lab h4 { margin: .12rem 0 .2rem; }
+  .lab .prompt { color: var(--ink-2); font-size: .9rem; margin: 0; }
+  .lab .hint { color: var(--muted); font-size: .8rem; margin: .4rem 0 0; }
+
+  /* ===== Quiz ===== */
+  .quiz {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 1.2rem; box-shadow: var(--shadow-sm); margin-top: 1.2rem;
+  }
+  .quiz-head {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 1rem; flex-wrap: wrap; margin-bottom: .7rem;
+  }
+  .quiz-head h3 { margin: 0; }
+  .quiz-controls { display: flex; gap: .45rem; flex-wrap: wrap; }
+  .question { padding: 1rem 0; border-bottom: 1px dashed var(--line); }
+  .question:last-of-type { border-bottom: 0; }
+  .q-text { font-weight: 700; display: flex; gap: .6rem; align-items: flex-start; margin-bottom: .2rem; }
+  .q-num {
+    flex: 0 0 auto; width: 1.6rem; height: 1.6rem; border-radius: 7px;
+    background: var(--surface-2); border: 1px solid var(--line);
+    display: grid; place-items: center; font-family: "Cascadia Code", Consolas, monospace;
+    font-size: .68rem; color: var(--brand);
+  }
+  .options { display: grid; gap: .42rem; margin: .65rem 0 0 2.2rem; }
+  .option {
+    display: flex; gap: .55rem; align-items: flex-start;
+    padding: .48rem .62rem; border: 1px solid var(--line); border-radius: 9px;
+    cursor: pointer; font-size: .88rem; transition: border-color .15s ease, background .15s ease;
+  }
+  .option:hover { border-color: var(--brand); background: rgba(79, 70, 229, .04); }
+  .option input { margin-top: .32rem; accent-color: var(--brand); }
+  .option .key {
+    font-family: "Cascadia Code", Consolas, monospace; font-weight: 800;
+    color: var(--muted); min-width: 1rem;
+  }
+  .question.correct .option.correct { border-color: #22c55e; background: rgba(34, 197, 94, .1); }
+  .question.wrong .option.wrong { border-color: #ef4444; background: rgba(239, 68, 68, .1); }
+  .question.correct .option.correct .key { color: #16a34a; }
+  .question.wrong .option.wrong .key { color: #dc2626; }
+  .explain {
+    display: none; margin: .65rem 0 0 2.2rem; padding: .65rem .75rem;
+    border-radius: 9px; background: var(--surface-2);
+    border-left: 3px solid var(--brand); font-size: .84rem; color: var(--ink-2);
+  }
+  .question.show-explain .explain { display: block; }
+  .quiz-result {
+    display: none; margin-top: 1rem; padding: 1rem; border-radius: 12px;
+    font-weight: 700; text-align: center; line-height: 1.6;
+  }
+  .quiz-result.show { display: block; }
+  .quiz-result.good { background: rgba(34, 197, 94, .12); color: #15803d; border: 1px solid rgba(34, 197, 94, .3); }
+  .quiz-result.mid { background: rgba(245, 158, 11, .12); color: #92400e; border: 1px solid rgba(245, 158, 11, .3); }
+  .quiz-result.bad { background: rgba(239, 68, 68, .1); color: #991b1b; border: 1px solid rgba(239, 68, 68, .26); }
+
+  /* ===== Checklist ===== */
+  .checklist { display: grid; gap: .5rem; margin: 1rem 0; }
+  .check {
+    display: flex; gap: .6rem; align-items: flex-start;
+    padding: .55rem .7rem; border: 1px solid var(--line); border-radius: 9px;
+    background: var(--surface); cursor: pointer; font-size: .89rem;
+  }
+  .check input { margin-top: .34rem; accent-color: var(--success); }
+  .check:hover { border-color: var(--brand); }
+  #checkCount { font-weight: 800; color: var(--brand); }
+
+  /* ===== Floating tools ===== */
+  .floating-tools {
+    position: fixed; right: 1rem; bottom: 1rem; z-index: 50;
+    display: flex; flex-direction: column; gap: .5rem;
+  }
+  .tool-btn {
+    width: 2.7rem; height: 2.7rem; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    box-shadow: var(--shadow); cursor: pointer; display: grid; place-items: center;
+    font: inherit; transition: transform .18s ease, opacity .18s ease, visibility .18s ease;
+  }
+  .tool-btn:hover { transform: translateY(-1px); color: var(--brand); }
+  #backTop { opacity: 0; visibility: hidden; transform: translateY(8px); }
+  #backTop.show { opacity: 1; visibility: visible; transform: none; }
+  .theme-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: linear-gradient(90deg, #0f172a 50%, #f8fafc 50%);
+    border: 1px solid currentColor;
+  }
+
+  /* ===== Footer ===== */
+  .footer {
+    background: #0b1020; color: #94a3b8; padding: 2.2rem 0;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+  }
+  .footer-inner { display: flex; justify-content: space-between; gap: 1.2rem; flex-wrap: wrap; }
+  .footer strong { color: #e2e8f0; }
+  .footer p { margin: .2rem 0; font-size: .82rem; }
+  .footer a { color: #a5b4fc; }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 1000px) {
+    .hero-inner { grid-template-columns: 1fr; gap: 2rem; }
+    .hero-card { transform: none; max-width: 540px; }
+    .layout { grid-template-columns: 1fr; gap: 1.2rem; margin-top: 1.2rem; }
+    .sidebar { position: static; }
+    .sidebar-inner { max-height: none; padding: .75rem; }
+    .toc { flex-direction: row; overflow-x: auto; gap: .2rem; padding-bottom: .25rem; }
+    .toc a { white-space: nowrap; border-left: 0; border-bottom: 2px solid transparent; padding: .4rem .6rem; }
+    .toc a.active { border-left: 0; border-bottom-color: var(--brand); }
+    .toc a.sub { display: none; }
+    .side-note { display: none; }
+    .toc-head { border-bottom: 0; padding-bottom: .2rem; }
+    .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 640px) {
+    body { font-size: 15.5px; }
+    .hero { padding-top: 1.4rem; }
+    .hero-inner { padding-top: 1.6rem; }
+    .hero h1 { font-size: clamp(2.2rem, 12vw, 3.4rem); }
+    .hero-stats-inner { grid-template-columns: repeat(2, 1fr); }
+    .stat:nth-child(2) { border-right: 0; }
+    .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid rgba(255, 255, 255, .08); }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .section-head { gap: .7rem; }
+    .section-num { width: 2.2rem; height: 2.2rem; }
+    .options, .explain { margin-left: 0; }
+    .hero-mini { grid-template-columns: 1fr; }
+    .floating-tools { right: .7rem; bottom: .7rem; }
+    .tool-btn { width: 2.5rem; height: 2.5rem; }
+    table { font-size: .78rem; }
+  }
+
+  /* ===== Print ===== */
+  @media print {
+    @page { margin: 14mm 12mm; }
+    body { background: #fff !important; color: #000 !important; font-size: 10.5pt; }
+    .reading-progress, .floating-tools, .hero-actions, .hero-stats,
+    .sidebar, .copy-btn, .practice-toolbar, .quiz-controls, .quiz-result,
+    .skip-link, .no-print { display: none !important; }
+    .hero {
+      background: #fff !important; color: #000 !important;
+      padding: 0 0 1rem; border-bottom: 2px solid #000;
+    }
+    .hero::before, .hero::after { display: none !important; }
+    .hero-inner { display: block; padding: 0; }
+    .hero h1 { color: #000 !important; font-size: 28pt; margin: .4rem 0; }
+    .hero-lead { color: #222 !important; }
+    .hero-badges span { border-color: #999 !important; color: #222 !important; background: #fff !important; }
+    .hero-card { display: none !important; }
+    .grad, .grad-2 { color: #000 !important; background: none !important; -webkit-text-fill-color: #000; }
+    .layout { display: block; width: 100%; margin: 0; }
+    main { max-width: none; }
+    .section { padding: 1rem 0; border-color: #ccc; break-inside: auto; }
+    .section-head { break-after: avoid; }
+    .section-num { border: 1px solid #999; background: #fff; color: #000; }
+    .card, .callout, .quiz, details.answer, details.qa, .table-wrap, .lab {
+      break-inside: avoid; box-shadow: none !important;
+      border-color: #bbb !important; background: #fff !important;
+    }
+    .code-block { break-inside: avoid; background: #f7f7f7 !important; border: 1px solid #999 !important; }
+    .code-head { background: #eee !important; border-color: #ccc !important; }
+    .code-lang { color: #000 !important; border-color: #999 !important; background: #fff !important; }
+    .code-title { color: #333 !important; }
+    pre code { color: #111 !important; font-size: 8.5pt; white-space: pre-wrap; }
+    .tok-kw { color: #5b21b6 !important; }
+    .tok-str { color: #166534 !important; }
+    .tok-num { color: #991b1b !important; }
+    .tok-com { color: #555 !important; }
+    .tok-fn { color: #0e7490 !important; }
+    .tok-row { color: #92400e !important; }
+    a { color: #000 !important; text-decoration: none; }
+    details.answer, details.qa { display: block; }
+    details.answer > summary, details.qa > summary { background: #f3f3f3 !important; color: #000 !important; }
+    details.answer > summary::before, details.qa > summary::before { display: none; }
+    .explain { display: block !important; background: #f5f5f5 !important; border-left-color: #999 !important; }
+    .question { break-inside: avoid; }
+    .option { border-color: #ccc !important; }
+    .badge { border: 1px solid #999; background: #fff !important; color: #000 !important; }
+    h2 { font-size: 18pt; }
+    h3 { font-size: 13pt; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">ข้ามไปที่เนื้อหา</a>
+<div class="reading-progress" aria-hidden="true"><span id="readingProgress"></span></div>
+
+<header class="hero">
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="dot"></span> DATABASE SYSTEM · WEEK 9 · EXAM NOTES</div>
+      <h1>SQL <span class="grad">CASE WHEN</span><br>&amp; <span class="grad-2">Trigger</span></h1>
+      <p class="hero-lead">คู่มืออ่านสอบฉบับสมบูรณ์ — ตั้งแต่หลักการตัดสินใจของ CASE WHEN ไปจนถึง Trigger ที่ทำงานอัตโนมัติ พร้อมโค้ด MySQL ที่รันได้จริง ผลลัพธ์ที่ควรได้ แล็บครบ 4 ข้อ และจุดพลาดที่อาจารย์ชอบออกสอบ</p>
+      <div class="hero-badges">
+        <span>ครบทั้ง 22 สไลด์</span>
+        <span>โค้ดพร้อมคัดลอก</span>
+        <span>ผลลัพธ์จริงจากแล็บ</span>
+        <span>แบบฝึกหัด + เฉลย</span>
+        <span>ข้อสอบจำลอง 12 ข้อ</span>
+      </div>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#overview">เริ่มอ่านเลย <span aria-hidden="true">↓</span></a>
+        <a class="btn btn-ghost" href="#practice">ลองทำข้อสอบ</a>
+        <button class="btn btn-ghost" type="button" data-print><span aria-hidden="true">🖨</span> พิมพ์ / บันทึก PDF</button>
+      </div>
+    </div>
+
+    <div class="hero-card" aria-hidden="true">
+      <div class="hero-card-top">
+        <span class="traffic"></span><span class="traffic"></span><span class="traffic"></span>
+        <span class="file">week9-cheatsheet.sql</span>
+      </div>
+      <div class="hero-formula">
+        <div class="formula-row"><span class="pill">CASE</span> WHEN ... THEN ... ELSE ... END</div>
+        <div class="formula-plus">+</div>
+        <div class="formula-row"><span class="pill-alt">TRIGGER</span> BEFORE / AFTER · INSERT / UPDATE / DELETE</div>
+        <div class="formula-eq">=</div>
+        <div class="formula-result">ระบบที่ตัดสินใจและทำงานอัตโนมัติ</div>
+      </div>
+      <div class="hero-mini">
+        <div><span>NEW</span>ข้อมูลแถวใหม่</div>
+        <div><span>OLD</span>ข้อมูลแถวเดิม</div>
+        <div><span>FOR EACH ROW</span>ทำงานทีละแถว</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="container hero-stats-inner">
+      <div class="stat"><b>22</b><span>สไลด์ต้นฉบับ</span></div>
+      <div class="stat"><b>4</b><span>แล็บ Trigger</span></div>
+      <div class="stat"><b>5</b><span>โจทย์ CASE WHEN</span></div>
+      <div class="stat"><b>12</b><span>ข้อสอบจำลอง</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar" aria-label="สารบัญ">
+    <div class="sidebar-inner">
+      <div class="toc-head">สารบัญ <span id="readPercent">0%</span></div>
+      <nav class="toc" id="toc">
+        <a href="#overview"><span class="n">00</span> ภาพรวม 5 นาที</a>
+        <a href="#fundamentals"><span class="n">01</span> พื้นฐานที่ต้องแม่น</a>
+        <a href="#case"><span class="n">02</span> CASE WHEN</a>
+        <a class="sub" href="#case-syntax">โครงสร้างและหลักการ</a>
+        <a class="sub" href="#case-examples">ตัวอย่างที่ออกสอบ</a>
+        <a class="sub" href="#case-errors">จุดพลาดยอดฮิต</a>
+        <a href="#trigger"><span class="n">03</span> Trigger</a>
+        <a class="sub" href="#trigger-basics">Before / After / New / Old</a>
+        <a class="sub" href="#trigger-labs">แล็บทั้ง 4 ข้อ</a>
+        <a class="sub" href="#trigger-case">CASE ภายใน Trigger</a>
+        <a class="sub" href="#trigger-rules">ข้อจำกัดและ Best Practice</a>
+        <a href="#data"><span class="n">04</span> ชุดข้อมูลและผลลัพธ์</a>
+        <a href="#practice"><span class="n">05</span> แบบฝึกหัด + Quiz</a>
+        <a href="#traps"><span class="n">06</span> รวมจุดออกสอบ</a>
+        <a href="#recap"><span class="n">07</span> สรุปท้ายบท</a>
+      </nav>
+      <div class="side-note">
+        <strong>โหมดอ่านสอบ:</strong> ซ่อนเฉลยไว้ก่อน ลองเขียนคำตอบเองแล้วค่อยกดดูเฉลย จะจำได้ดีกว่าอ่านผ่าน ๆ
+      </div>
+    </div>
+  </aside>
+
+  <main id="main">
+    <!-- ===== 00 OVERVIEW ===== -->
+    <section class="section" id="overview">
+      <div class="section-head">
+        <div class="section-num">00</div>
+        <div>
+          <p class="kicker">ภาพรวม</p>
+          <h2>อ่าน 5 นาที เข้าใจทั้งบท</h2>
+          <p class="section-sub">บทนี้มีสองเครื่องมือที่ทำงานคนละหน้าที่ แต่ใช้ร่วมกันได้ทรงพลัง: <strong>CASE WHEN</strong> ตัดสินใจและแปลงค่า และ <strong>Trigger</strong> ลงมือทำอัตโนมัติเมื่อข้อมูลเปลี่ยน</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <article class="card">
+          <div class="card-icon">CASE</div>
+          <h3>CASE WHEN คือ “สมอง” ที่ตัดสินใจ</h3>
+          <p>เป็น <strong>expression</strong> ที่คืนค่าเดียวในแต่ละแถว ใช้เขียนเงื่อนไขแบบ “ถ้า…แล้ว…ไม่งั้น…” ได้ใน <code>SELECT</code>, <code>ORDER BY</code>, <code>UPDATE</code> และภายใน Trigger</p>
+          <p>ตรวจเงื่อนไขจากบนลงล่าง และ <strong>หยุดที่เงื่อนไขแรกที่เป็นจริง</strong> — ลำดับจึงสำคัญมาก</p>
+        </article>
+        <article class="card teal">
+          <div class="card-icon">TRG</div>
+          <h3>Trigger คือ “มือ” ที่ลงมือทำ</h3>
+          <p>เป็นชุดคำสั่งที่ฐานข้อมูลเรียกให้เองเมื่อมี <code>INSERT</code>, <code>UPDATE</code> หรือ <code>DELETE</code> เกิดขึ้นกับตาราง</p>
+          <p>ใช้บันทึกประวัติ ตรวจสอบข้อมูลก่อนบันทึก หรืออัปเดตข้อมูลที่เกี่ยวข้อง เช่น ลดสต็อกหลังขายสินค้า</p>
+        </article>
+      </div>
+
+      <div class="grid-3" style="margin-top:1rem;">
+        <article class="card amber">
+          <div class="card-icon">01</div>
+          <h3>จำให้ขึ้นใจ</h3>
+          <p><strong>CASE</strong> ตัดสินใจจากเงื่อนไข<br><strong>Trigger</strong> ทำงานเมื่อเกิดเหตุการณ์<br><strong>NEW / OLD</strong> คือข้อมูลที่เปลี่ยน</p>
+        </article>
+        <article class="card rose">
+          <div class="card-icon">02</div>
+          <h3>จุดที่คนพลาดบ่อย</h3>
+          <p>เรียงเงื่อนไขกว้างไว้ก่อน, ลืม <code>ELSE</code>, ใช้ <code>AFTER</code> ทั้งที่ต้องตรวจสอบก่อน, และลืม <code>DELIMITER</code></p>
+        </article>
+        <article class="card">
+          <div class="card-icon">03</div>
+          <h3>วิธีอ่านหน้านี้</h3>
+          <p>กล่อง <strong>สีเหลือง</strong> = จุดออกสอบ, <strong>สีแดง</strong> = กับดัก, <strong>สีเขียว</strong> = ตัวอย่างที่ถูกต้อง อย่าลืมทำ Quiz ท้ายบท</p>
+        </article>
+      </div>
+
+      <div class="callout exam">
+        <div class="ci">!</div>
+        <div>
+          <strong>คำถามใหญ่ 3 ข้อที่ต้องตอบได้ก่อนสอบ</strong>
+          <ol style="margin-bottom:0;">
+            <li>เงื่อนไขใน CASE ถูกตรวจอย่างไร และถ้าไม่มี <code>ELSE</code> จะเกิดอะไร?</li>
+            <li>Trigger ทำงานเมื่อไร — <code>BEFORE</code> หรือ <code>AFTER</code> และกับ event ใด?</li>
+            <li>ข้อมูลแถวใหม่และแถวเดิมอยู่ที่ <code>NEW</code> หรือ <code>OLD</code> และใช้กับ event ไหนได้บ้าง?</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="memory-box">
+        <h4>แผนที่บทเรียนแบบ 10 วินาที</h4>
+        <p style="margin-bottom:.4rem;"><strong>CASE WHEN</strong> → ตัดสินใจ / แปลงค่า / จัดลำดับ → ใช้เดี่ยว ๆ ใน query หรือใช้ภายใน <strong>Trigger</strong></p>
+        <p style="margin-bottom:0;"><strong>Trigger</strong> → เกิดจาก INSERT / UPDATE / DELETE → แยก BEFORE (ตรวจ/แก้ก่อนบันทึก) กับ AFTER (บันทึก log/อัปเดตตารางอื่น) → ใช้ <strong>NEW / OLD</strong> อ้างถึงแถว</p>
+      </div>
+    </section>
+
+    <!-- ===== 01 FUNDAMENTALS ===== -->
+    <section class="section" id="fundamentals">
+      <div class="section-head">
+        <div class="section-num">01</div>
+        <div>
+          <p class="kicker">ปูพื้นก่อนสอบ</p>
+          <h2>พื้นฐาน SQL ที่ต้องแม่นก่อนเขียน CASE และ Trigger</h2>
+          <p class="section-sub">สองหัวข้อนี้ไม่ได้แยกจาก SQL พื้นฐานเลย — ถ้าไม่แน่ใจว่า query ทำงานตามลำดับไหน หรือ NULL ทำงานอย่างไร โค้ด CASE และ Trigger ก็จะพลาดง่าย</p>
+        </div>
+      </div>
+
+      <h3>1.1 คำสั่ง SQL พื้นฐาน และ Trigger เกี่ยวข้องอย่างไร</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>คำสั่ง</th><th>หน้าที่</th><th>ตัวอย่าง</th><th>Trigger ที่เกี่ยวข้อง</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">SELECT</td><td>อ่านข้อมูล</td><td><code>SELECT * FROM students;</code></td><td>ไม่ทำให้ Trigger ทำงาน</td></tr>
+            <tr><td class="mono">INSERT</td><td>เพิ่มแถวใหม่</td><td><code>INSERT INTO orders (...) VALUES (...);</code></td><td><code>BEFORE INSERT</code> / <code>AFTER INSERT</code></td></tr>
+            <tr><td class="mono">UPDATE</td><td>แก้ไขแถว</td><td><code>UPDATE products SET stock_qty = 10;</code></td><td><code>BEFORE UPDATE</code> / <code>AFTER UPDATE</code></td></tr>
+            <tr><td class="mono">DELETE</td><td>ลบแถว</td><td><code>DELETE FROM orders WHERE order_id = 1001;</code></td><td><code>BEFORE DELETE</code> / <code>AFTER DELETE</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <div class="ci">i</div>
+        <div><strong>จำสั้น ๆ:</strong> Trigger ไม่ทำงานเมื่อเราแค่ <code>SELECT</code> — ต้องมี INSERT, UPDATE หรือ DELETE เท่านั้น</div>
+      </div>
+
+      <h3>1.2 ลำดับการทำงานของ query ที่ต้องรู้</h3>
+      <p>เวลาเขียน SQL เราเขียน <code>SELECT</code> ก่อน แต่ฐานข้อมูลประมวลผลตามลำดับนี้:</p>
+      <div class="flow">
+        <div class="flow-step"><span class="fnum">1</span><div><strong>FROM</strong> — เลือกตารางและ join</div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><span class="fnum">2</span><div><strong>WHERE</strong> — กรองแถวก่อนจัดกลุ่ม</div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><span class="fnum">3</span><div><strong>GROUP BY</strong> — จัดกลุ่มสำหรับ aggregate</div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><span class="fnum">4</span><div><strong>HAVING</strong> — กรองกลุ่มหลัง aggregate</div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><span class="fnum">5</span><div><strong>SELECT</strong> — คำนวณคอลัมน์และ alias</div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><span class="fnum">6</span><div><strong>ORDER BY</strong> — เรียงผลลัพธ์ (ใช้ alias ที่เพิ่งสร้างได้)</div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><span class="fnum">7</span><div><strong>LIMIT</strong> — จำกัดจำนวนแถว</div></div>
+      </div>
+      <p><strong>ผลที่ตามมา:</strong> alias ที่สร้างใน <code>SELECT</code> เช่น <code>grade_result</code> ใช้ใน <code>ORDER BY</code> ได้ แต่โดยทั่วไป <strong>ใช้ใน WHERE ไม่ได้</strong> เพราะ WHERE ทำงานก่อน SELECT</p>
+
+      <div class="grid-2">
+        <article class="card">
+          <h4>NULL คือ “ไม่ทราบค่า”</h4>
+          <ul>
+            <li><code>NULL</code> ไม่เท่ากับ <code>0</code> และไม่เท่ากับ <code>''</code></li>
+            <li><code>score = NULL</code> ให้ผลเป็น unknown ไม่ใช่ true</li>
+            <li>ใช้ <code>IS NULL</code> หรือ <code>IS NOT NULL</code> ในการตรวจ</li>
+            <li>ถ้า CASE ไม่มี <code>ELSE</code> และไม่เข้าเงื่อนไขใดเลย ผลลัพธ์จะเป็น <code>NULL</code></li>
+          </ul>
+        </article>
+        <article class="card">
+          <h4>Aggregate ที่ใช้บ่อย</h4>
+          <ul>
+            <li><code>SUM()</code> — ผลรวม</li>
+            <li><code>COUNT()</code> — นับจำนวน</li>
+            <li><code>AVG()</code> — ค่าเฉลี่ย</li>
+            <li><code>MIN()</code> / <code>MAX()</code> — ค่าต่ำสุด / สูงสุด</li>
+            <li>ถ้าใช้ aggregate กับคอลัมน์อื่น ต้องมี <code>GROUP BY</code></li>
+          </ul>
+        </article>
+      </div>
+
+      <h3>1.3 ตารางที่ใช้ในบทนี้</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ตาราง</th><th>คอลัมน์หลัก</th><th>ใช้ในหัวข้อ</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">students</td><td><code>student_id</code> (PK), <code>student_name</code>, <code>score</code>, <code>grade</code></td><td>CASE แปลงคะแนนเป็นเกรด</td></tr>
+            <tr><td class="mono">products</td><td><code>product_id</code> (PK), <code>product_name</code>, <code>category</code>, <code>unit_price</code>, <code>stock_qty</code></td><td>CASE จัดสถานะสต็อก, Trigger ลดสต็อก</td></tr>
+            <tr><td class="mono">customers</td><td><code>customer_id</code> (PK), <code>customer_name</code>, <code>total_spending</code>, <code>customer_level</code></td><td>CASE จัดระดับลูกค้า, Trigger อัปเดตยอดสะสม</td></tr>
+            <tr><td class="mono">orders</td><td><code>order_id</code> (PK), <code>customer_id</code> (FK), <code>total_amount</code>, <code>status</code>, <code>order_date</code></td><td>CASE เรียงลำดับ, Trigger บันทึก audit</td></tr>
+            <tr><td class="mono">order_items</td><td><code>order_item_id</code> (PK), <code>order_id</code> (FK), <code>product_id</code> (FK), <code>quantity</code>, <code>unit_price</code></td><td>Trigger ตรวจสอบและลดสต็อก</td></tr>
+            <tr><td class="mono">order_audit</td><td><code>audit_id</code> (PK), <code>order_id</code>, <code>action_name</code>, <code>action_time</code>, <code>note</code></td><td>Trigger บันทึกประวัติ</td></tr>
+            <tr><td class="mono">product_stock_log</td><td><code>log_id</code> (PK), <code>product_id</code>, <code>old_stock</code>, <code>new_stock</code>, <code>action_name</code>, <code>update_time</code></td><td>Trigger บันทึกการเปลี่ยนสต็อก</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout success">
+        <div class="ci">✓</div>
+        <div><strong>ทำไมต้องรู้ schema:</strong> ใน Trigger เราต้องอ้างชื่อคอลัมน์จริง เช่น <code>NEW.quantity</code>, <code>OLD.stock_qty</code> และเวลาเขียนลง log ต้องใส่ค่าลงคอลัมน์ให้ตรงชนิดข้อมูล มิฉะนั้นจะเกิด error ตอนรัน</div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">01_dml_basic.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>-- อ่านข้อมูล
+SELECT student_id, student_name, score
+FROM students
+WHERE score &gt;= 60;
+
+-- แก้ไขข้อมูล
+UPDATE students
+SET grade = 'PASS'
+WHERE score &gt;= 60;
+
+-- เพิ่มข้อมูล
+INSERT INTO students (student_name, score)
+VALUES ('New Student', 72);
+
+-- ลบข้อมูล
+DELETE FROM students
+WHERE student_id = 12;</code></pre>
+      </div>
+
+      <div class="callout warn">
+        <div class="ci">!</div>
+        <div><strong>ระวัง:</strong> <code>UPDATE</code> หรือ <code>DELETE</code> ที่ไม่มี <code>WHERE</code> จะกระทบ <strong>ทุกแถว</strong> ในตาราง ก่อนรันให้ใช้ <code>SELECT</code> ตรวจเงื่อนไขเดียวกันก่อนเสมอ</div>
+      </div>
+    </section>
+
+    <!-- ===== 02 CASE WHEN ===== -->
+    <section class="section" id="case">
+      <div class="section-head">
+        <div class="section-num">02</div>
+        <div>
+          <p class="kicker">เครื่องมือที่ 1</p>
+          <h2>CASE WHEN: เขียนเงื่อนไขให้ SQL ตัดสินใจ</h2>
+          <p class="section-sub">CASE WHEN เปลี่ยน “เงื่อนไข” ให้กลายเป็น “ค่า” ที่เอาไปแสดง บันทึก หรือใช้เรียงลำดับได้ หลักเดียวที่ต้องจำคือ: ตรวจจากบนลงล่าง และหยุดทันทีเมื่อเจอเงื่อนไขแรกที่เป็นจริง</p>
+        </div>
+      </div>
+
+      <h3 id="case-syntax">2.1 โครงสร้างและหลักการทำงาน</h3>
+      <p>รูปแบบที่ใช้บ่อยที่สุดคือ <strong>searched CASE</strong> ซึ่งเขียนเงื่อนไขได้อิสระ ทั้ง <code>&gt;=</code>, <code>BETWEEN</code>, <code>IN</code>, <code>AND</code>, <code>OR</code> และ <code>IS NULL</code></p>
+
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">case_syntax.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>CASE
+  WHEN condition_1 THEN result_1
+  WHEN condition_2 THEN result_2
+  ...
+  ELSE result_default
+END</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ส่วนประกอบ</th><th>ความหมาย</th><th>จำเป็นไหม</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">CASE</td><td>เปิด expression</td><td>จำเป็น</td></tr>
+            <tr><td class="mono">WHEN condition</td><td>เงื่อนไขที่ต้องการตรวจ</td><td>ต้องมีอย่างน้อย 1 เงื่อนไข</td></tr>
+            <tr><td class="mono">THEN result</td><td>ค่าที่จะคืนเมื่อเงื่อนไขเป็นจริง</td><td>จำเป็น</td></tr>
+            <tr><td class="mono">ELSE result</td><td>ค่าเริ่มต้นเมื่อไม่เข้าเงื่อนไขใดเลย</td><td>ไม่บังคับ แต่ <strong>ควรใส่</strong></td></tr>
+            <tr><td class="mono">END</td><td>ปิด expression</td><td>จำเป็นเสมอ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>นอกจากนี้ยังมี <strong>simple CASE</strong> ซึ่งเปรียบเทียบความเท่ากันอย่างเดียว:</p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">simple_case.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>SELECT order_id, status,
+       CASE status
+         WHEN 'DONE'    THEN 'เสร็จสิ้น'
+         WHEN 'WAITING' THEN 'รอดำเนินการ'
+         WHEN 'URGENT'  THEN 'เร่งด่วน'
+         ELSE 'อื่น ๆ'
+       END AS status_text
+FROM orders;</code></pre>
+      </div>
+      <p><strong>เลือกใช้แบบไหน:</strong> ถ้าเป็นการเทียบค่าแบบตรงตัวใช้ simple CASE ได้ แต่ถ้าต้องใช้ <code>&gt;=</code>, <code>BETWEEN</code>, <code>IN</code> หรือหลายเงื่อนไขรวมกัน ต้องใช้ searched CASE</p>
+
+      <div class="callout info">
+        <div class="ci">i</div>
+        <div><strong>CASE เป็น expression ไม่ใช่คำสั่ง:</strong> มัน <strong>คืนค่า</strong> หนึ่งค่าในแต่ละแถว จึงเอาไปใส่ใน <code>SELECT</code>, <code>ORDER BY</code>, <code>UPDATE ... SET</code>, <code>INSERT ... VALUES</code> หรือภายใน Trigger ได้ แต่ตัวมันเองไม่เปลี่ยนข้อมูลจนกว่าจะเอาไปใช้กับ <code>UPDATE</code> / <code>INSERT</code></div>
+      </div>
+
+      <h3>2.2 ตรวจจากบนลงล่างและหยุดที่เงื่อนไขแรก</h3>
+      <div class="flow">
+        <div class="flow-step"><span class="fnum">1</span><div>เริ่มตรวจ <strong>WHEN #1</strong></div></div>
+        <div class="flow-arrow">↓ จริง</div>
+        <div class="flow-step flow-result"><span class="fnum">✓</span><div>คืน <strong>ผลลัพธ์ #1</strong> แล้ว <strong>หยุดทันที</strong> — ไม่ตรวจเงื่อนไขที่เหลือ</div></div>
+        <div class="flow-arrow">↓ เท็จ</div>
+        <div class="flow-step"><span class="fnum">2</span><div>ตรวจ <strong>WHEN #2</strong> ต่อไป</div></div>
+        <div class="flow-arrow">↓ เท็จทุกเงื่อนไข</div>
+        <div class="flow-step flow-stop"><span class="fnum">3</span><div>ถ้ามี <strong>ELSE</strong> → คืนค่า ELSE<br>ถ้าไม่มี <strong>ELSE</strong> → คืน <strong>NULL</strong></div></div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <h4 style="color:var(--danger);">เขียนแบบนี้ผิด</h4>
+          <div class="code-block">
+            <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">wrong_order.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+            <pre><code>CASE
+  WHEN score &gt;= 50 THEN 'Pass'
+  WHEN score &gt;= 80 THEN 'Excellent'
+  ELSE 'Fail'
+END</code></pre>
+          </div>
+          <p style="font-size:.88rem;"><code>score = 90</code> จะได้ <strong>Pass</strong> เพราะเงื่อนไข <code>&gt;= 50</code> เป็นจริงก่อน และ CASE หยุดตรงนั้น</p>
+        </div>
+        <div>
+          <h4 style="color:var(--success);">เขียนแบบนี้ถูก</h4>
+          <div class="code-block">
+            <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">right_order.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+            <pre><code>CASE
+  WHEN score &gt;= 80 THEN 'Excellent'
+  WHEN score &gt;= 50 THEN 'Pass'
+  ELSE 'Fail'
+END</code></pre>
+          </div>
+          <p style="font-size:.88rem;"><code>score = 90</code> จะได้ <strong>Excellent</strong> เพราะเงื่อนไขที่เฉพาะกว่าและสำคัญกว่าอยู่ก่อน</p>
+        </div>
+      </div>
+
+      <div class="callout exam">
+        <div class="ci">!</div>
+        <div><strong>หลักที่ออกสอบบ่อย:</strong> เงื่อนไขแบบช่วงตัวเลข ให้เรียง <strong>จากมากไปน้อย</strong> (หรือจากแคบไปกว้าง) เช่น <code>&gt;= 80</code> → <code>&gt;= 70</code> → <code>&gt;= 60</code> เพราะถ้าเอา <code>&gt;= 60</code> ไว้ก่อน คะแนน 95 จะถูกจับเป็น C ทันที</div>
+      </div>
+
+      <h3 id="case-examples">2.3 ตัวอย่างที่ออกสอบ</h3>
+
+      <h4>ตัวอย่าง 1: แปลงคะแนนเป็นเกรด</h4>
+      <p>ใช้ CASE ใน <code>SELECT</code> เพื่อสร้างคอลัมน์ผลลัพธ์ใหม่ โดยไม่ต้องเพิ่มคอลัมน์จริงลงในตาราง</p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">02_grade.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>SELECT
+  student_id,
+  student_name,
+  score,
+  CASE
+    WHEN score &gt;= 80 THEN 'A'
+    WHEN score &gt;= 70 THEN 'B'
+    WHEN score &gt;= 60 THEN 'C'
+    WHEN score &gt;= 50 THEN 'D'
+    ELSE 'F'
+  END AS grade_result
+FROM students;</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>ผลลัพธ์จากข้อมูลตั้งต้นในไฟล์แล็บ (fresh setup)</caption>
+          <thead><tr><th class="num">student_id</th><th>student_name</th><th class="num">score</th><th>grade_result</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td>Somchai</td><td class="num">95</td><td><span class="badge badge-a">A</span></td></tr>
+            <tr><td class="num">2</td><td>Suda</td><td class="num">84</td><td><span class="badge badge-a">A</span></td></tr>
+            <tr><td class="num">3</td><td>Narin</td><td class="num">76</td><td><span class="badge badge-b">B</span></td></tr>
+            <tr><td class="num">4</td><td>Mali</td><td class="num">68</td><td><span class="badge badge-c">C</span></td></tr>
+            <tr><td class="num">5</td><td>Anan</td><td class="num">54</td><td><span class="badge badge-d">D</span></td></tr>
+            <tr><td class="num">6</td><td>Pim</td><td class="num">49</td><td><span class="badge badge-f">F</span></td></tr>
+            <tr><td class="num">7</td><td>Krit</td><td class="num">100</td><td><span class="badge badge-a">A</span></td></tr>
+            <tr><td class="num">8</td><td>Dao</td><td class="num">73</td><td><span class="badge badge-b">B</span></td></tr>
+            <tr><td class="num">9</td><td>Beam</td><td class="num">61</td><td><span class="badge badge-c">C</span></td></tr>
+            <tr><td class="num">10</td><td>Fah</td><td class="num">57</td><td><span class="badge badge-d">D</span></td></tr>
+            <tr><td class="num">11</td><td>June</td><td class="num">88</td><td><span class="badge badge-a">A</span></td></tr>
+            <tr><td class="num">12</td><td>Ton</td><td class="num">35</td><td><span class="badge badge-f">F</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2">
+        <article class="card">
+          <h4>ตรวจชายขอบให้แม่น</h4>
+          <div class="table-wrap" style="margin:0;">
+            <table style="min-width:0;">
+              <thead><tr><th class="num">คะแนน</th><th>เกรด</th><th>เหตุผล</th></tr></thead>
+              <tbody>
+                <tr><td class="num">80</td><td><span class="badge badge-a">A</span></td><td>เข้าเงื่อนไขแรก</td></tr>
+                <tr><td class="num">79</td><td><span class="badge badge-b">B</span></td><td>ไม่ถึง 80 แต่ถึง 70</td></tr>
+                <tr><td class="num">70</td><td><span class="badge badge-b">B</span></td><td>เข้าเงื่อนไขที่สอง</td></tr>
+                <tr><td class="num">69</td><td><span class="badge badge-c">C</span></td><td>ไม่ถึง 70 แต่ถึง 60</td></tr>
+                <tr><td class="num">50</td><td><span class="badge badge-d">D</span></td><td>เข้าเงื่อนไขที่สี่</td></tr>
+                <tr><td class="num">49</td><td><span class="badge badge-f">F</span></td><td>ไม่เข้าเงื่อนไขใดเลย → ELSE</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+        <article class="card teal">
+          <h4>สิ่งที่ควรสังเกต</h4>
+          <ul>
+            <li><code>AS grade_result</code> เป็นเพียงชื่อคอลัมน์ในผลลัพธ์ ไม่ได้สร้างคอลัมน์จริงในตาราง</li>
+            <li>ถ้าต้องการบันทึกลงตาราง ต้องใช้ <code>UPDATE</code> (ดูตัวอย่างที่ 4)</li>
+            <li>ถ้าไม่ใส่ <code>ELSE</code> คะแนนต่ำกว่า 50 จะได้ <code>NULL</code> ไม่ใช่ F</li>
+            <li>ทุก branch ควรคืนชนิดข้อมูลเดียวกัน ในที่นี้เป็นข้อความทั้งหมด</li>
+          </ul>
+        </article>
+      </div>
+
+      <h4>ตัวอย่าง 2: จัดระดับลูกค้าจากยอดซื้อสะสม</h4>
+      <p>CASE ใช้กับค่าที่คำนวณจาก <strong>aggregate</strong> ได้ เช่น <code>SUM(total_amount)</code> โดยจัดกลุ่มด้วย <code>GROUP BY customer_id</code></p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">03_customer_level.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>SELECT
+  customer_id,
+  SUM(total_amount) AS total_spending,
+  CASE
+    WHEN SUM(total_amount) &gt;= 50000 THEN 'VIP'
+    WHEN SUM(total_amount) &gt;= 10000 THEN 'Gold'
+    ELSE 'Standard'
+  END AS customer_level
+FROM orders
+GROUP BY customer_id;</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>ผลลัพธ์จากข้อมูล orders ตั้งต้น</caption>
+          <thead><tr><th class="num">customer_id</th><th class="num">total_spending</th><th>customer_level</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td class="num">8,000.00</td><td><span class="badge badge-standard">Standard</span></td></tr>
+            <tr><td class="num">2</td><td class="num">48,000.00</td><td><span class="badge badge-gold">Gold</span></td></tr>
+            <tr><td class="num">4</td><td class="num">15,000.00</td><td><span class="badge badge-gold">Gold</span></td></tr>
+            <tr><td class="num">5</td><td class="num">62,000.00</td><td><span class="badge badge-vip">VIP</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <div class="ci">!</div>
+        <div><strong>ทำไม customer 3 ไม่ปรากฏ?</strong> เพราะ query เริ่มจาก <code>FROM orders</code> แล้ว GROUP BY — ลูกค้าที่ไม่มี order จึงไม่มีแถวให้จัดกลุ่ม ถ้าต้องการลูกค้าทุกคนต้องเริ่มจาก <code>customers</code> แล้ว <code>LEFT JOIN orders</code> และใช้ <code>COALESCE(SUM(o.total_amount), 0)</code></div>
+      </div>
+
+      <div class="grid-2">
+        <article class="card rose">
+          <h4>กับดัก: เขียน Gold ก่อน VIP</h4>
+          <div class="code-block" style="margin:.6rem 0;">
+            <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">wrong_level_order.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+            <pre><code>CASE
+  WHEN SUM(total_amount) &gt;= 10000 THEN 'Gold'
+  WHEN SUM(total_amount) &gt;= 50000 THEN 'VIP'
+  ELSE 'Standard'
+END</code></pre>
+          </div>
+          <p style="margin-bottom:0;font-size:.88rem;">ลูกค้ายอด 60,000 จะได้ <strong>Gold</strong> เพราะ <code>&gt;= 10000</code> เป็นจริงก่อน — เงื่อนไข VIP ไม่ถูกตรวจเลย</p>
+        </article>
+        <article class="card">
+          <h4>กับดัก: ใช้ alias ใน CASE เดียวกัน</h4>
+          <div class="code-block" style="margin:.6rem 0;">
+            <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">alias_trap.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+            <pre><code>SELECT
+  customer_id,
+  SUM(total_amount) AS total_spending,
+  CASE
+    WHEN total_spending &gt;= 50000 THEN 'VIP'
+    ELSE 'Standard'
+  END AS customer_level
+FROM orders
+GROUP BY customer_id;</code></pre>
+          </div>
+          <p style="margin-bottom:0;font-size:.88rem;">โดยทั่วไป alias ที่เพิ่งสร้างใน <code>SELECT</code> ยังไม่พร้อมใช้ใน expression เดียวกัน ให้เขียน <code>SUM(total_amount)</code> ซ้ำ หรือใช้ subquery</p>
+        </article>
+      </div>
+
+      <h4>ตัวอย่าง 3: เรียงลำดับความสำคัญด้วย CASE ใน ORDER BY</h4>
+      <p>บางครั้งลำดับที่ธุรกิจต้องการไม่ใช่ A–Z หรือมากไปน้อย แต่เป็นลำดับที่กำหนดเอง เช่น ต้องการเห็น <strong>URGENT → WAITING → DONE</strong></p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">04_priority_order.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>SELECT order_id, status, total_amount, order_date
+FROM orders
+ORDER BY
+  CASE
+    WHEN status = 'URGENT'  THEN 1
+    WHEN status = 'WAITING' THEN 2
+    WHEN status = 'DONE'    THEN 3
+    ELSE 4
+  END,
+  order_date DESC;</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>ผลลัพธ์: priority 1 มาก่อน แล้วจึงเรียงวันที่ล่าสุดภายในกลุ่มเดียวกัน</caption>
+          <thead><tr><th class="num">order_id</th><th>status</th><th class="num">total_amount</th><th>order_date</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1005</td><td><span class="badge badge-urgent">URGENT</span></td><td class="num">15,000.00</td><td>2026-09-12</td></tr>
+            <tr><td class="num">1004</td><td><span class="badge badge-waiting">WAITING</span></td><td class="num">30,000.00</td><td>2026-09-10</td></tr>
+            <tr><td class="num">1001</td><td><span class="badge badge-waiting">WAITING</span></td><td class="num">5,000.00</td><td>2026-09-01</td></tr>
+            <tr><td class="num">1007</td><td><span class="badge badge-done">DONE</span></td><td class="num">10,000.00</td><td>2026-09-20</td></tr>
+            <tr><td class="num">1006</td><td><span class="badge badge-done">DONE</span></td><td class="num">52,000.00</td><td>2026-09-15</td></tr>
+            <tr><td class="num">1003</td><td><span class="badge badge-done">DONE</span></td><td class="num">18,000.00</td><td>2026-09-05</td></tr>
+            <tr><td class="num">1002</td><td><span class="badge badge-done">DONE</span></td><td class="num">3,000.00</td><td>2026-09-03</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="ci">!</div>
+        <div><strong>จุดออกสอบ:</strong> ถ้าใช้ <code>ORDER BY status</code> เฉย ๆ ฐานข้อมูลจะเรียงตามตัวอักษร คือ <strong>DONE → URGENT → WAITING</strong> ซึ่งผิดกฎธุรกิจ การใช้ CASE แปลงสถานะเป็นตัวเลขลำดับจึงเป็นวิธีที่ถูกต้อง และถ้าลำดับแรกซ้ำกัน ต้องมีตัวเรียงรอง เช่น <code>order_date DESC</code></div>
+      </div>
+
+      <h4>ตัวอย่าง 4: อัปเดตข้อมูลด้วย CASE WHEN</h4>
+      <p>ต่างจากตัวอย่างก่อนหน้า เพราะคำสั่งนี้ <strong>เปลี่ยนข้อมูลจริง</strong> ในตาราง</p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">05_update_grade.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>-- 1) ตรวจผลลัพธ์ก่อน
+SELECT student_id, student_name, score,
+       CASE
+         WHEN score &gt;= 80 THEN 'A'
+         WHEN score &gt;= 70 THEN 'B'
+         WHEN score &gt;= 60 THEN 'C'
+         WHEN score &gt;= 50 THEN 'D'
+         ELSE 'F'
+       END AS grade_preview
+FROM students;
+
+-- 2) เมื่อถูกต้องแล้วค่อย UPDATE
+UPDATE students
+SET grade = CASE
+  WHEN score &gt;= 80 THEN 'A'
+  WHEN score &gt;= 70 THEN 'B'
+  WHEN score &gt;= 60 THEN 'C'
+  WHEN score &gt;= 50 THEN 'D'
+  ELSE 'F'
+END;</code></pre>
+      </div>
+
+      <div class="grid-2">
+        <div class="table-wrap" style="margin-top:0;">
+          <table>
+            <caption>ก่อน UPDATE</caption>
+            <thead><tr><th class="num">student_id</th><th>student_name</th><th class="num">score</th><th>grade</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1</td><td>Somchai</td><td class="num">95</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+              <tr><td class="num">2</td><td>Suda</td><td class="num">84</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+              <tr><td class="num">6</td><td>Pim</td><td class="num">49</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+              <tr><td class="num">12</td><td>Ton</td><td class="num">35</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap" style="margin-top:0;">
+          <table>
+            <caption>หลัง UPDATE</caption>
+            <thead><tr><th class="num">student_id</th><th>student_name</th><th class="num">score</th><th>grade</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1</td><td>Somchai</td><td class="num">95</td><td><span class="badge badge-a">A</span></td></tr>
+              <tr><td class="num">2</td><td>Suda</td><td class="num">84</td><td><span class="badge badge-a">A</span></td></tr>
+              <tr><td class="num">6</td><td>Pim</td><td class="num">49</td><td><span class="badge badge-f">F</span></td></tr>
+              <tr><td class="num">12</td><td>Ton</td><td class="num">35</td><td><span class="badge badge-f">F</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="callout danger">
+        <div class="ci">!</div>
+        <div>
+          <strong>สามข้อควรระวังก่อนรัน UPDATE</strong>
+          <ul style="margin-bottom:0;">
+            <li><strong>ไม่มี WHERE = กระทบทุกแถว</strong> ในตัวอย่างนี้ตั้งใจอัปเดตทุกคน แต่ถ้าไม่ตั้งใจ ให้ใส่ <code>WHERE student_id IN (...)</code></li>
+            <li><strong>ควร SELECT ตรวจก่อน</strong> ด้วยเงื่อนไขเดียวกับที่ใช้ใน UPDATE</li>
+            <li><strong>ระวัง NULL:</strong> ถ้า <code>score</code> เป็น NULL เงื่อนไข <code>&gt;=</code> ทุกตัวจะเป็น unknown และจะตกไปที่ <code>ELSE 'F'</code> ซึ่งอาจไม่ใช่สิ่งที่ต้องการ</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">05b_update_grade_safe_null.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>UPDATE students
+SET grade = CASE
+  WHEN score IS NULL THEN NULL
+  WHEN score &gt;= 80 THEN 'A'
+  WHEN score &gt;= 70 THEN 'B'
+  WHEN score &gt;= 60 THEN 'C'
+  WHEN score &gt;= 50 THEN 'D'
+  ELSE 'F'
+END;</code></pre>
+      </div>
+
+      <h4>ตัวอย่าง 5 (จากไฟล์แบบฝึก): แปลงสถานะตามยอดเงิน</h4>
+      <p>โจทย์ข้อนี้รวมหลายเงื่อนไขไว้ใน CASE เดียว และใช้ <code>ELSE status</code> เพื่อ “คงค่าเดิม” เมื่อไม่เข้าเงื่อนไขใด</p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">06_status_case.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>SELECT
+  order_id,
+  total_amount,
+  status AS old_status,
+  CASE
+    WHEN total_amount &gt;= 50000 THEN 'URGENT'
+    WHEN total_amount &lt; 50000 AND status = 'URGENT' THEN 'WAITING'
+    ELSE status
+  END AS new_status
+FROM orders
+ORDER BY order_id;</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>ผลลัพธ์จากข้อมูล orders ตั้งต้น</caption>
+          <thead><tr><th class="num">order_id</th><th class="num">total_amount</th><th>old_status</th><th>new_status</th><th>เหตุผล</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1001</td><td class="num">5,000.00</td><td><span class="badge badge-waiting">WAITING</span></td><td><span class="badge badge-waiting">WAITING</span></td><td>ไม่เข้าเงื่อนไข → ELSE คงค่าเดิม</td></tr>
+            <tr><td class="num">1002</td><td class="num">3,000.00</td><td><span class="badge badge-done">DONE</span></td><td><span class="badge badge-done">DONE</span></td><td>ไม่เข้าเงื่อนไข → ELSE คงค่าเดิม</td></tr>
+            <tr><td class="num">1003</td><td class="num">18,000.00</td><td><span class="badge badge-done">DONE</span></td><td><span class="badge badge-done">DONE</span></td><td>ไม่เข้าเงื่อนไข → ELSE คงค่าเดิม</td></tr>
+            <tr><td class="num">1004</td><td class="num">30,000.00</td><td><span class="badge badge-waiting">WAITING</span></td><td><span class="badge badge-waiting">WAITING</span></td><td>ไม่เข้าเงื่อนไข → ELSE คงค่าเดิม</td></tr>
+            <tr><td class="num">1005</td><td class="num">15,000.00</td><td><span class="badge badge-urgent">URGENT</span></td><td><span class="badge badge-waiting">WAITING</span></td><td>ยอด &lt; 50,000 และเดิม URGENT → ลดเป็น WAITING</td></tr>
+            <tr><td class="num">1006</td><td class="num">52,000.00</td><td><span class="badge badge-done">DONE</span></td><td><span class="badge badge-urgent">URGENT</span></td><td>ยอด ≥ 50,000 → URGENT แม้เดิมจะเป็น DONE</td></tr>
+            <tr><td class="num">1007</td><td class="num">10,000.00</td><td><span class="badge badge-done">DONE</span></td><td><span class="badge badge-done">DONE</span></td><td>ไม่เข้าเงื่อนไข → ELSE คงค่าเดิม</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="ci">!</div>
+        <div><strong>สังเกตลำดับ:</strong> เงื่อนไข <code>total_amount &gt;= 50000</code> ต้องอยู่ก่อน เพราะเป็นกฎที่ “override” สถานะเดิม ถ้าเอาเงื่อนไข <code>status = 'URGENT'</code> ไว้ก่อนโดยไม่ตรวจยอด อาจลด order ยอดสูงจาก URGENT เป็น WAITING ผิด ๆ</div>
+      </div>
+
+      <p>ถ้าต้องการบันทึกผลลงตารางจริง ใช้ UPDATE เวอร์ชันเดียวกัน:</p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">06b_update_status.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>UPDATE orders
+SET status = CASE
+  WHEN total_amount &gt;= 50000 THEN 'URGENT'
+  WHEN total_amount &lt; 50000 AND status = 'URGENT' THEN 'WAITING'
+  ELSE status
+END;</code></pre>
+      </div>
+      <p class="table-note">หลังรัน: 1005 เปลี่ยนเป็น WAITING, 1006 เปลี่ยนเป็น URGENT, ที่เหลือคงเดิม — ควร SELECT ตรวจก่อนและอย่าลืมว่าคำสั่งนี้กระทบทุกแถวถ้าไม่มี WHERE</p>
+
+      <h3>2.4 CASE กับ Aggregate: ทำรายงานแบบมีเงื่อนไข</h3>
+      <p>Pattern ที่มีประโยชน์มากและมักออกสอบคือการใส่ CASE ไว้ใน <code>SUM()</code> หรือ <code>COUNT()</code> เพื่อนับ/รวมเฉพาะบางเงื่อนไข</p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">07_conditional_aggregate.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>SELECT
+  SUM(CASE WHEN status = 'DONE'    THEN total_amount ELSE 0 END) AS done_total,
+  SUM(CASE WHEN status = 'WAITING' THEN total_amount ELSE 0 END) AS waiting_total,
+  SUM(CASE WHEN status = 'URGENT'  THEN total_amount ELSE 0 END) AS urgent_total,
+  COUNT(CASE WHEN status = 'URGENT' THEN 1 END) AS urgent_count
+FROM orders;</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>ผลลัพธ์จากข้อมูล orders ตั้งต้น</caption>
+          <thead><tr><th class="num">done_total</th><th class="num">waiting_total</th><th class="num">urgent_total</th><th class="num">urgent_count</th></tr></thead>
+          <tbody>
+            <tr><td class="num">83,000.00</td><td class="num">35,000.00</td><td class="num">15,000.00</td><td class="num">1</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2">
+        <article class="card">
+          <h4>ทำไม SUM ต้องมี ELSE 0</h4>
+          <p>ถ้าไม่ใส่ ELSE ค่าที่ไม่เข้าเงื่อนไขจะเป็น NULL และ <code>SUM</code> จะข้าม NULL ไป ผลรวมอาจดูเหมือนเดิม แต่ถ้าทุกแถวไม่เข้าเงื่อนไขเลย <code>SUM</code> จะคืน <strong>NULL</strong> ไม่ใช่ 0 ซึ่งอาจทำให้รายงานผิด</p>
+        </article>
+        <article class="card teal">
+          <h4>ทำไม COUNT ไม่ต้องมี ELSE</h4>
+          <p><code>COUNT(CASE WHEN ... THEN 1 END)</code> จะนับเฉพาะค่าที่ไม่เป็น NULL — แถวที่ไม่เข้าเงื่อนไขได้ NULL และถูก COUNT ข้ามไป จึงนับเฉพาะที่ตรงเงื่อนไขได้พอดี</p>
+        </article>
+      </div>
+
+      <h3>2.5 CASE กับ NULL และ Simple CASE</h3>
+      <div class="grid-2">
+        <article class="card rose">
+          <h4>กับดัก NULL</h4>
+          <div class="code-block" style="margin:.6rem 0;">
+            <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">null_trap.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+            <pre><code>-- ผิด: ไม่มีทาง match
+CASE score
+  WHEN NULL THEN 'N/A'
+  WHEN 80 THEN 'A'
+  ELSE 'F'
+END</code></pre>
+          </div>
+          <p style="margin-bottom:0;font-size:.88rem;">เพราะ <code>score = NULL</code> ไม่ใช่ true ต้องใช้ <code>CASE WHEN score IS NULL THEN ...</code></p>
+        </article>
+        <article class="card">
+          <h4>วิธีที่ถูก</h4>
+          <div class="code-block" style="margin:.6rem 0;">
+            <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">null_safe.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+            <pre><code>CASE
+  WHEN score IS NULL THEN 'N/A'
+  WHEN score &gt;= 80 THEN 'A'
+  WHEN score &gt;= 70 THEN 'B'
+  ELSE 'F'
+END</code></pre>
+          </div>
+          <p style="margin-bottom:0;font-size:.88rem;">ตรวจ NULL ก่อนทุกครั้งถ้าคอลัมน์นั้น nullable และการได้ F แทน N/A จะทำให้สรุปผลผิด</p>
+        </article>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Pattern</th><th>ใช้เมื่อ</th><th>ตัวอย่าง</th></tr></thead>
+          <tbody>
+            <tr><td>ช่วงตัวเลข</td><td>เกรด, ระดับคะแนน</td><td><code>WHEN score &gt;= 80 THEN 'A'</code></td></tr>
+            <tr><td>เท่ากับ 0</td><td>สถานะสต็อก</td><td><code>WHEN stock_qty = 0 THEN 'Out of stock'</code></td></tr>
+            <tr><td>ช่วงปิด</td><td>1–10, 11–20</td><td><code>WHEN qty BETWEEN 1 AND 10 THEN 'Low'</code></td></tr>
+            <tr><td>หลายค่า</td><td>กลุ่มสถานะ</td><td><code>WHEN status IN ('URGENT','WAITING') THEN 'Active'</code></td></tr>
+            <tr><td>NULL</td><td>ข้อมูลยังไม่ถูกกรอก</td><td><code>WHEN col IS NULL THEN 'N/A'</code></td></tr>
+            <tr><td>ข้อความ</td><td>ค้นหา pattern</td><td><code>WHEN name LIKE 'S%' THEN 'Group S'</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>2.6 CASE expression vs CASE statement</h3>
+      <p>สองอย่างนี้ชื่อคล้ายกันแต่ใช้คนละที่ — ออกสอบเป็นข้อหลอกได้ง่าย</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th>CASE expression</th><th>CASE statement</th></tr></thead>
+          <tbody>
+            <tr><td><strong>ใช้ที่ไหน</strong></td><td>ใน query ทั่วไป: SELECT, ORDER BY, UPDATE, VALUES และ expression ภายใน Trigger</td><td>ใน stored program / trigger body เพื่อสั่งให้ทำงานเป็นขั้นตอน</td></tr>
+            <tr><td><strong>จบด้วย</strong></td><td><code>END</code></td><td><code>END CASE;</code></td></tr>
+            <tr><td><strong>คืนค่า</strong></td><td>คืนค่าเดียว</td><td>ไม่คืนค่า แต่ executes statements</td></tr>
+            <tr><td><strong>ตัวอย่าง</strong></td><td><code>SET grade = CASE WHEN ... THEN ... END;</code></td><td><code>CASE WHEN ... THEN SET ...; END CASE;</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout info">
+        <div class="ci">i</div>
+        <div>ถ้าเห็น <code>END CASE</code> แปลว่ากำลังอยู่ใน stored program หรือ trigger body ไม่ใช่ query SELECT ทั่วไป — และถ้าเห็น <code>END</code> เฉย ๆ ใน SELECT แปลว่าเป็น CASE expression</div>
+      </div>
+
+      <h3 id="case-errors">2.7 จุดพลาดยอดฮิตใน CASE WHEN</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>อาการที่เจอ</th><th>สาเหตุ</th><th>วิธีแก้</th></tr></thead>
+          <tbody>
+            <tr><td>ผลลัพธ์เป็น NULL ทั้งที่ควรมีค่า</td><td>ไม่มี ELSE และไม่มีเงื่อนไขใดเป็นจริง</td><td>เพิ่ม <code>ELSE</code> หรือตรวจเงื่อนไขให้ครบ</td></tr>
+            <tr><td>คะแนน 90 ได้ Pass</td><td>เงื่อนไข <code>&gt;= 50</code> อยู่ก่อน <code>&gt;= 80</code></td><td>เรียงเงื่อนไขเฉพาะ/ค่ามากไว้ก่อน</td></tr>
+            <tr><td>Syntax error ใกล้ END</td><td>ใช้ <code>END CASE</code> ใน expression</td><td>เปลี่ยนเป็น <code>END</code></td></tr>
+            <tr><td>ใช้ alias ใน WHERE ไม่ได้</td><td>WHERE ทำงานก่อน SELECT</td><td>เขียน expression ซ้ำ หรือใช้ subquery</td></tr>
+            <tr><td>หา NULL ไม่เจอ</td><td>ใช้ <code>= NULL</code></td><td>ใช้ <code>IS NULL</code> / <code>IS NOT NULL</code></td></tr>
+            <tr><td>ผลลัพธ์ชนิดข้อมูลแปลก</td><td>แต่ละ branch คืนคนละชนิด</td><td>ทำให้ทุก branch เป็นชนิดเดียวกัน</td></tr>
+            <tr><td>UPDATE กระทบทั้งตาราง</td><td>ลืม WHERE</td><td>เพิ่ม WHERE และ SELECT ตรวจก่อน</td></tr>
+            <tr><td>อยากเลือกชื่อตาราง/คอลัมน์ด้วย CASE</td><td>CASE ใช้เลือก identifier ไม่ได้</td><td>ต้องใช้ dynamic SQL หรือออกแบบ query ใหม่</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="memory-box">
+        <h4>สูตรจำ CASE WHEN</h4>
+        <div class="code-block" style="margin:.6rem 0;">
+          <div class="code-head"><span class="code-lang">RECALL</span><span class="code-title">4 บรรทัดจำขึ้นใจ</span><button class="copy-btn" type="button">คัดลอก</button></div>
+          <pre><code>CASE
+  WHEN เงื่อนไข THEN ค่า
+  ELSE ค่าเริ่มต้น
+END</code></pre>
+        </div>
+        <ul style="margin-bottom:0;">
+          <li><strong>บนลงล่าง</strong> — หยุดที่เงื่อนไขแรกที่เป็นจริง</li>
+          <li><strong>เฉพาะก่อนกว้าง</strong> — ถ้าเป็นช่วงตัวเลขให้เรียงมากไปน้อย</li>
+          <li><strong>ไม่มี ELSE = NULL</strong> — อย่าลืมใส่เมื่อต้องการค่า default</li>
+          <li><strong>END ต้องมี</strong> — และใน expression ใช้ <code>END</code> ไม่ใช่ <code>END CASE</code></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== 03 TRIGGER ===== -->
+    <section class="section" id="trigger">
+      <div class="section-head">
+        <div class="section-num">03</div>
+        <div>
+          <p class="kicker">เครื่องมือที่ 2</p>
+          <h2>Trigger: ให้ฐานข้อมูลทำงานอัตโนมัติ</h2>
+          <p class="section-sub">Trigger คือชุดคำสั่งที่ผูกกับตารางและเหตุการณ์ เมื่อมี INSERT, UPDATE หรือ DELETE ฐานข้อมูลจะเรียกให้เองโดยที่แอปไม่ต้องสั่ง — เหมาะกับงานตรวจสอบ บันทึกประวัติ และอัปเดตข้อมูลที่เกี่ยวข้อง</p>
+        </div>
+      </div>
+
+      <h3 id="trigger-basics">3.1 Trigger คืออะไร และใช้ทำอะไร</h3>
+      <div class="grid-2">
+        <article class="card">
+          <div class="card-icon">A</div>
+          <h4>บันทึกประวัติ (Audit Log)</h4>
+          <p>เมื่อมีการเพิ่ม/แก้ไข/ลบข้อมูล ให้เก็บว่าใครทำอะไร เมื่อไร ค่าเดิมคืออะไร ค่าใหม่คืออะไร</p>
+          <p style="margin-bottom:0;"><strong>ตัวอย่าง:</strong> เพิ่ม order แล้วบันทึกลง <code>order_audit</code>, แก้ stock แล้วบันทึกลง <code>product_stock_log</code></p>
+        </article>
+        <article class="card teal">
+          <div class="card-icon">B</div>
+          <h4>ตรวจสอบข้อมูล (Validation)</h4>
+          <p>ป้องกันข้อมูลผิดตั้งแต่ก่อนบันทึก เช่น จำนวนสินค้าต้องมากกว่า 0, ราคาต้องไม่ติดลบ, ต้องมีสินค้าในสต็อกพอ</p>
+          <p style="margin-bottom:0;"><strong>ตัวอย่าง:</strong> <code>BEFORE INSERT</code> บน <code>order_items</code> แล้ว <code>SIGNAL</code> error เมื่อ <code>quantity &lt;= 0</code></p>
+        </article>
+        <article class="card amber">
+          <div class="card-icon">C</div>
+          <h4>อัปเดตข้อมูลที่เกี่ยวข้อง</h4>
+          <p>เมื่อเกิดเหตุการณ์หนึ่ง ให้กระทบอีกตารางโดยอัตโนมัติ เช่น เพิ่มรายการขายแล้วลดสต็อก หรือเพิ่ม order แล้วอัปเดตยอดซื้อสะสมของลูกค้า</p>
+          <p style="margin-bottom:0;"><strong>ตัวอย่าง:</strong> <code>AFTER INSERT</code> บน <code>order_items</code> แล้ว <code>UPDATE products SET stock_qty = stock_qty - NEW.quantity</code></p>
+        </article>
+        <article class="card rose">
+          <div class="card-icon">D</div>
+          <h4>สร้างค่าที่คำนวณได้</h4>
+          <p>เติมค่า default หรือค่าที่ derive จากข้อมูลอื่น เช่น ตั้งเวลา created_at, จัดระดับลูกค้าจากยอดซื้อ, เปลี่ยนสถานะตามเงื่อนไข</p>
+          <p style="margin-bottom:0;"><strong>ตัวอย่าง:</strong> ใช้ CASE WHEN ภายใน Trigger เพื่อคำนวณ <code>customer_level</code></p>
+        </article>
+      </div>
+
+      <div class="callout info">
+        <div class="ci">i</div>
+        <div><strong>Trigger ไม่ใช่เวทมนตร์:</strong> มันทำเฉพาะสิ่งที่เราเขียนไว้ ไม่รู้ business ทั้งหมด และไม่ทำงานเมื่อไม่มี DML — ถ้าแค่ <code>SELECT</code> ข้อมูล Trigger จะไม่ถูกเรียก</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ข้อดี</th><th>ข้อควรระวัง</th></tr></thead>
+          <tbody>
+            <tr><td>ทำงานสม่ำเสมอทุกแอปที่เขียนข้อมูล ไม่ต้องพึ่งโค้ดฝั่ง app</td><td>Logic ถูกซ่อนอยู่เบื้องหลัง ทำให้ debug ยาก</td></tr>
+            <tr><td>ลดโค้ดซ้ำเมื่อหลายโปรแกรมต้องทำกฎเดียวกัน</td><td>อาจเกิด cascading effects กระทบหลายตารางโดยไม่คาดคิด</td></tr>
+            <tr><td>เหมาะกับ audit และกฎข้อมูลระดับฐานข้อมูล</td><td>ทำงานทีละแถว — bulk insert ขนาดใหญ่อาจช้า</td></tr>
+            <tr><td>บังคับใช้กฎแม้ข้อมูลถูกแก้จาก tool อื่น</td><td>ไม่ควรยัด business logic ที่ซับซ้อนทั้งหมดไว้ใน Trigger</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.2 องค์ประกอบของ Trigger</h3>
+      <p>Trigger หนึ่งตัวต้องระบุให้ครบว่า <strong>ทำเมื่อไร</strong> (timing), <strong>ทำเมื่อเกิดอะไร</strong> (event), <strong>กับตารางไหน</strong> และ <strong>ทำอะไร</strong> (body)</p>
+
+      <div class="flow">
+        <div class="flow-step"><span class="fnum">1</span><div><strong>DML statement</strong> — มี INSERT / UPDATE / DELETE เกิดขึ้น</div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><span class="fnum">2</span><div><strong>BEFORE trigger</strong> — ทำงานทีละแถวก่อนเขียนข้อมูลจริง (ถ้ามี)</div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><span class="fnum">3</span><div><strong>เขียนแถว</strong> — ฐานข้อมูลบันทึกข้อมูลลงตาราง</div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step"><span class="fnum">4</span><div><strong>AFTER trigger</strong> — ทำงานทีละแถวหลังเขียนข้อมูลแล้ว (ถ้ามี)</div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step flow-result"><span class="fnum">✓</span><div><strong>COMMIT</strong> — ถ้าทุกอย่างสำเร็จ; ถ้ามี error ใน transactional table จะ rollback</div></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ส่วนประกอบ</th><th>ค่าที่เป็นไปได้</th><th>ความหมาย</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">Timing</td><td><code>BEFORE</code> / <code>AFTER</code></td><td>ทำก่อนหรือหลังแถวถูกบันทึก</td></tr>
+            <tr><td class="mono">Event</td><td><code>INSERT</code> / <code>UPDATE</code> / <code>DELETE</code></td><td>เหตุการณ์ที่ทำให้ Trigger ทำงาน</td></tr>
+            <tr><td class="mono">Table</td><td>ชื่อตารางจริง</td><td>Trigger ผูกกับตารางเดียว</td></tr>
+            <tr><td class="mono">FOR EACH ROW</td><td>ต้องระบุ</td><td>MySQL ทำงานทีละแถวที่ได้รับผลกระทบ</td></tr>
+            <tr><td class="mono">Body</td><td><code>BEGIN ... END</code></td><td>ชุดคำสั่งที่ทำงานเมื่อ Trigger ถูกเรียก</td></tr>
+            <tr><td class="mono">NEW / OLD</td><td>row alias</td><td>อ้างถึงข้อมูลแถวใหม่ / แถวเดิม</td></tr>
+            <tr><td class="mono">DELIMITER</td><td>เช่น <code>//</code></td><td>บอก client ว่าคำสั่งยังไม่จบ เพราะ body มี <code>;</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="ci">!</div>
+        <div><strong>หนึ่ง Trigger = หนึ่ง timing + หนึ่ง event + หนึ่งตาราง</strong> — ถ้าต้องการจัดการทั้ง INSERT และ UPDATE ต้องสร้างสอง Trigger (หรือแยกหน้าที่กัน) ไม่สามารถเขียน <code>BEFORE INSERT OR UPDATE</code> ใน MySQL ได้</div>
+      </div>
+
+      <h3>3.3 BEFORE vs AFTER: เลือกให้ถูกข้อสอบชอบถาม</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th><code>BEFORE</code></th><th><code>AFTER</code></th></tr></thead>
+          <tbody>
+            <tr><td><strong>ทำงานเมื่อ</strong></td><td>ก่อนแถวถูกเขียนลงตาราง</td><td>หลังแถวถูกเขียนลงตาราง</td></tr>
+            <tr><td><strong>เหมาะกับ</strong></td><td>ตรวจสอบ, แก้ไข/เติมค่าใน <code>NEW</code>, ตั้ง default</td><td>บันทึก audit, อัปเดตตารางอื่น, คำนวณยอดสะสม</td></tr>
+            <tr><td><strong>แก้ไข NEW</strong></td><td>ได้ เช่น <code>SET NEW.created_at = NOW();</code></td><td>ไม่ได้</td></tr>
+            <tr><td><strong>เห็นค่า AUTO_INCREMENT</strong></td><td>มักยังไม่เห็นค่าจริง (ค่าเริ่มต้นเป็น 0)</td><td>เห็นค่าที่ฐานข้อมูลสร้างให้แล้ว</td></tr>
+            <tr><td><strong>ถ้า SIGNAL error</strong></td><td>แถวไม่ถูกเขียนเลย</td><td>แถวถูกเขียนแล้ว แต่ InnoDB จะ rollback statement</td></tr>
+            <tr><td><strong>ตัวอย่างในบทนี้</strong></td><td>ห้าม quantity &lt;= 0</td><td>บันทึก audit, ลด stock, อัปเดตยอดลูกค้า</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2">
+        <article class="card">
+          <h4>เลือก BEFORE เมื่อ…</h4>
+          <ul>
+            <li>ต้องการ <strong>ปฏิเสธ</strong>ข้อมูลผิดก่อนบันทึก</li>
+            <li>ต้องการแก้ค่าในแถวใหม่ เช่น trim ข้อความ, ตั้ง timestamp</li>
+            <li>ต้องการตรวจเงื่อนไขที่ต้องหยุดก่อนเกิด write</li>
+          </ul>
+        </article>
+        <article class="card teal">
+          <h4>เลือก AFTER เมื่อ…</h4>
+          <ul>
+            <li>ต้องการบันทึกเหตุการณ์ที่ <strong>สำเร็จแล้ว</strong></li>
+            <li>ต้องการใช้ค่า AUTO_INCREMENT ของแถวใหม่</li>
+            <li>ต้องการอัปเดตตารางอื่นที่อ้างถึงแถวนี้</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="callout warn">
+        <div class="ci">!</div>
+        <div><strong>AFTER ยังทำให้ statement ล้มเหลวได้:</strong> ถ้า Trigger AFTER เกิด error กับตาราง InnoDB การเปลี่ยนแปลงของ statement นั้นจะถูก rollback ทั้งหมด — แต่ถ้าเป็นตารางที่ไม่รองรับ transaction (เช่น MyISAM) อาจไม่ rollback ตาม ดังนั้นอย่าคิดว่า AFTER = ปลอดภัยเสมอ</div>
+      </div>
+
+      <h3>3.4 NEW และ OLD: กุญแจของ Trigger</h3>
+      <p><code>NEW</code> และ <code>OLD</code> เป็น <strong>row alias</strong> ใช้เข้าถึงข้อมูลของแถวที่กำลังถูกกระทำ ไม่ใช่ชื่อตาราง และไม่สามารถ <code>SELECT * FROM NEW</code> ได้</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Event</th><th><code>OLD</code></th><th><code>NEW</code></th><th>ใช้งาน</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-done">INSERT</span></td><td>— ใช้ไม่ได้</td><td>✓ ใช้ได้</td><td><code>NEW.order_id</code>, <code>NEW.quantity</code></td></tr>
+            <tr><td><span class="badge badge-waiting">UPDATE</span></td><td>✓ ใช้ได้</td><td>✓ ใช้ได้</td><td>เทียบค่าเดิม/ค่าใหม่ เช่น <code>OLD.stock_qty</code> กับ <code>NEW.stock_qty</code></td></tr>
+            <tr><td><span class="badge badge-urgent">DELETE</span></td><td>✓ ใช้ได้</td><td>— ใช้ไม่ได้</td><td>เก็บค่าเดิมก่อนลบ เช่น <code>OLD.order_id</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-3">
+        <article class="card">
+          <h4>INSERT</h4>
+          <p>มีแต่แถวใหม่ → ใช้ <code>NEW</code> อย่างเดียว</p>
+          <p style="margin-bottom:0;"><code>INSERT INTO log VALUES (NEW.id, NOW());</code></p>
+        </article>
+        <article class="card teal">
+          <h4>UPDATE</h4>
+          <p>มีทั้งค่าเดิมและค่าใหม่ → ใช้ <code>OLD</code> กับ <code>NEW</code></p>
+          <p style="margin-bottom:0;"><code>OLD.stock_qty → NEW.stock_qty</code></p>
+        </article>
+        <article class="card rose">
+          <h4>DELETE</h4>
+          <p>มีแต่แถวเดิม → ใช้ <code>OLD</code> อย่างเดียว</p>
+          <p style="margin-bottom:0;"><code>INSERT INTO archive VALUES (OLD.id);</code></p>
+        </article>
+      </div>
+
+      <div class="callout exam">
+        <div class="ci">!</div>
+        <div>
+          <strong>กฎที่ต้องตอบได้:</strong>
+          <ul style="margin-bottom:0;">
+            <li><code>OLD</code> เป็น <strong>read-only</strong> — แก้ไม่ได้</li>
+            <li><code>NEW</code> แก้ได้เฉพาะใน <code>BEFORE</code> trigger</li>
+            <li>ใน <code>BEFORE INSERT</code> ค่า AUTO_INCREMENT ของ <code>NEW</code> มักยังเป็น 0 — ถ้าต้องใช้ ID จริงให้ใช้ <code>AFTER INSERT</code></li>
+            <li>ใน <code>DELETE</code> ไม่มี <code>NEW</code>; ใน <code>INSERT</code> ไม่มี <code>OLD</code></li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>3.5 โครงสร้าง Trigger ใน MySQL และความลับของ DELIMITER</h3>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">trigger_syntax.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>DELIMITER //
+
+CREATE TRIGGER trigger_name
+BEFORE INSERT ON table_name
+FOR EACH ROW
+BEGIN
+  -- SQL statements
+END//
+
+DELIMITER ;</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>บรรทัด</th><th>ความหมาย</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">DELIMITER //</td><td>เปลี่ยนตัวคั่นคำสั่งชั่วคราวจาก <code>;</code> เป็น <code>//</code> เพื่อให้ client ไม่ตัดจบตรง <code>;</code> ภายใน BEGIN...END</td></tr>
+            <tr><td class="mono">CREATE TRIGGER ...</td><td>สร้าง Trigger ชื่อที่กำหนด (ชื่อต้องไม่ซ้ำใน schema เดียวกัน)</td></tr>
+            <tr><td class="mono">BEFORE INSERT ON ...</td><td>ระบุ timing + event + ตาราง</td></tr>
+            <tr><td class="mono">FOR EACH ROW</td><td>ให้ทำงานทีละแถวที่ได้รับผลกระทบ (MySQL ใช้แบบ row-level)</td></tr>
+            <tr><td class="mono">BEGIN ... END</td><td>บล็อกของคำสั่ง ถ้ามีหลายคำสั่งต้องใช้ BEGIN...END</td></tr>
+            <tr><td class="mono">END//</td><td>ปิด block และปิดคำสั่งด้วย delimiter ใหม่</td></tr>
+            <tr><td class="mono">DELIMITER ;</td><td>คืนค่าตัวคั่นกลับเป็น <code>;</code> ก่อนเขียนคำสั่งอื่นต่อ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <div class="ci">i</div>
+        <div><strong>DELIMITER ไม่ใช่คำสั่ง SQL ของ server:</strong> เป็นคำสั่งของ client (mysql CLI, Workbench) ใช้บอกว่า “คำสั่งยังไม่จบ” — ถ้ารันผ่านเครื่องมือบางตัวที่จัดการ delimiter ให้เอง อาจไม่ต้องพิมพ์ก็ได้ แต่ในข้อสอบให้เขียนติดไว้เพื่อความปลอดภัย</div>
+      </div>
+
+      <h3 id="trigger-labs">3.6 แล็บ 1: บันทึก Audit Log หลังเพิ่ม Order</h3>
+      <p><strong>โจทย์:</strong> สร้าง Trigger หลัง INSERT ตาราง <code>orders</code> เพื่อบันทึก <code>order_id</code>, action และเวลาลง <code>order_audit</code></p>
+
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">08_audit_trigger.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>DELIMITER //
+
+CREATE TRIGGER trg_orders_after_insert
+AFTER INSERT ON orders
+FOR EACH ROW
+BEGIN
+  INSERT INTO order_audit(order_id, action_name, action_time)
+  VALUES (NEW.order_id, 'INSERT', NOW());
+END//
+
+DELIMITER ;</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>บรรทัดสำคัญ</th><th>อธิบาย</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">AFTER INSERT ON orders</td><td>ทำงานหลัง order ถูกบันทึกสำเร็จ — เหมาะกับ audit เพราะต้องการบันทึกเหตุการณ์ที่เกิดขึ้นแล้ว</td></tr>
+            <tr><td class="mono">FOR EACH ROW</td><td>ถ้า INSERT หลายแถวในคำสั่งเดียว Trigger จะทำงานทีละแถว</td></tr>
+            <tr><td class="mono">NEW.order_id</td><td>ค่า order_id ของแถวที่เพิ่งเพิ่ม — ใน AFTER INSERT ค่า AUTO_INCREMENT ถูกสร้างแล้ว</td></tr>
+            <tr><td class="mono">'INSERT'</td><td>ชื่อ action ที่ต้องการเก็บ</td></tr>
+            <tr><td class="mono">NOW()</td><td>เวลาที่เกิดเหตุการณ์</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>ทดสอบด้วยการเพิ่ม order แล้วดู log:</p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">08b_test_audit.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>INSERT INTO orders (customer_id, total_amount, status, order_date)
+VALUES (2, 5000.00, 'URGENT', CURDATE());
+
+SELECT * FROM order_audit
+ORDER BY audit_id DESC;</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>ตัวอย่างผลลัพธ์ (order_id อาจเป็น 2001 หรือค่าถัดไปตาม AUTO_INCREMENT)</caption>
+          <thead><tr><th class="num">audit_id</th><th class="num">order_id</th><th>action_name</th><th>action_time</th><th>note</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td class="num">2001</td><td><span class="badge badge-done">INSERT</span></td><td>2026-10-21 10:30:00</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout success">
+        <div class="ci">✓</div>
+        <div><strong>ทำไม audit table ไม่ควรมี FOREIGN KEY ไป orders:</strong> ถ้ามี FK แล้ว order ถูกลบภายหลัง อาจลบ log ไม่ได้หรือ log หายไปด้วย — audit log ควรเป็นประวัติที่อยู่แยกและคงทน (ในแล็บนี้ <code>order_audit.order_id</code> เป็นเพียง INT ไม่มี FK)</div>
+      </div>
+
+      <div class="callout warn">
+        <div class="ci">!</div>
+        <div><strong>ถ้า INSERT log ล้มเหลว:</strong> ในตาราง InnoDB การ INSERT order ทั้ง statement จะถูก rollback เพราะ Trigger ทำงานอยู่ใน transaction เดียวกัน — นี่คือพฤติกรรมที่ควรรู้ ไม่ใช่ bug</div>
+      </div>
+
+      <h3>3.7 แล็บ 2: ตรวจสอบข้อมูลก่อนบันทึก</h3>
+      <p><strong>โจทย์:</strong> สร้าง Trigger ก่อน INSERT ตาราง <code>order_items</code> เพื่อห้าม <code>quantity &lt;= 0</code></p>
+
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">09_validate_trigger.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>DELIMITER //
+
+CREATE TRIGGER trg_order_items_before_insert
+BEFORE INSERT ON order_items
+FOR EACH ROW
+BEGIN
+  IF NEW.quantity &lt;= 0 THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'Quantity must be more than 0';
+  END IF;
+END//
+
+DELIMITER ;</code></pre>
+      </div>
+
+      <div class="grid-2">
+        <article class="card">
+          <h4>ทำไมต้อง BEFORE</h4>
+          <p>เราต้องการ <strong>หยุด</strong> ข้อมูลผิดก่อนถูกเขียนลงตาราง ถ้าใช้ AFTER แถวจะถูกเขียนไปแล้ว แล้วค่อย rollback ซึ่งไม่ใช่เจตนาของการ validate และอาจมี side effect กับตารางอื่นก่อน error</p>
+        </article>
+        <article class="card rose">
+          <h4>ทำไมต้อง SIGNAL</h4>
+          <p>การ <code>SELECT</code> เฉย ๆ ไม่หยุด INSERT และการตั้งค่า <code>NEW.quantity = 0</code> ก็ไม่ได้แจ้ง error ชัดเจน — ต้องใช้ <code>SIGNAL</code> เพื่อยกเลิก statement และส่งข้อความ error กลับไป</p>
+        </article>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ส่วนประกอบ</th><th>ความหมาย</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">IF ... THEN ... END IF;</td><td>ตรวจเงื่อนไข ถ้าจริงให้ทำคำสั่งข้างใน</td></tr>
+            <tr><td class="mono">SIGNAL SQLSTATE '45000'</td><td>ส่ง error ที่ผู้ใช้กำหนดเอง — SQLSTATE 45000 คือ unhandled user-defined exception</td></tr>
+            <tr><td class="mono">SET MESSAGE_TEXT = '...'</td><td>ข้อความที่ client จะเห็น ควรสั้นและบอกสาเหตุ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>ทดสอบด้วย quantity = 0:</p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">09b_test_validate.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>INSERT INTO order_items(order_id, product_id, quantity, unit_price)
+VALUES (1001, 2, 0, 390.00);</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>ผลลัพธ์ที่ควรได้</caption>
+          <thead><tr><th>ผลลัพธ์</th><th>ความหมาย</th></tr></thead>
+          <tbody>
+            <tr><td><code>ERROR 1644 (45000): Quantity must be more than 0</code></td><td>Trigger ทำงาน และยกเลิก INSERT — ไม่มีแถวใหม่ถูกบันทึก</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="ci">!</div>
+        <div><strong>ข้อสอบชอบถาม:</strong> “Trigger ตรวจสอบข้อมูลควรใช้ BEFORE หรือ AFTER เพราะอะไร?” — ตอบ: <strong>BEFORE</strong> เพราะต้องการตรวจและปฏิเสธก่อนข้อมูลถูกเขียนลงตาราง และสามารถแก้ไข <code>NEW</code> ได้ถ้าจำเป็น</div>
+      </div>
+
+      <h3>3.8 แล็บ 3: ลดสต็อกหลังขายสินค้า</h3>
+      <p><strong>โจทย์:</strong> สร้าง Trigger หลัง INSERT ตาราง <code>order_items</code> เพื่อลด <code>stock_qty</code> ของสินค้าตามจำนวนที่ขาย</p>
+
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">10_stock_trigger.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>DELIMITER //
+
+CREATE TRIGGER trg_order_items_after_insert
+AFTER INSERT ON order_items
+FOR EACH ROW
+BEGIN
+  UPDATE products
+  SET stock_qty = stock_qty - NEW.quantity
+  WHERE product_id = NEW.product_id;
+END//
+
+DELIMITER ;</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>บรรทัด</th><th>อธิบาย</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">AFTER INSERT ON order_items</td><td>รายการขายถูกบันทึกสำเร็จแล้ว จึงค่อยไปปรับสต็อก</td></tr>
+            <tr><td class="mono">UPDATE products ...</td><td>แก้ตารางอื่น (ไม่ใช่ตารางที่ Trigger ผูกอยู่) จึงทำได้</td></tr>
+            <tr><td class="mono">NEW.quantity</td><td>จำนวนที่เพิ่งขายไป</td></tr>
+            <tr><td class="mono">WHERE product_id = NEW.product_id</td><td>ลดเฉพาะสินค้าที่ถูกขาย</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>ทดสอบก่อน/หลัง:</p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">10b_test_stock.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>-- ก่อนขาย
+SELECT product_id, product_name, stock_qty
+FROM products
+WHERE product_id = 2;
+
+-- ขายสินค้า 1 ชิ้น
+INSERT INTO order_items(order_id, product_id, quantity, unit_price)
+VALUES (1001, 2, 1, 390.00);
+
+-- หลังขาย
+SELECT product_id, product_name, stock_qty
+FROM products
+WHERE product_id = 2;</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ช่วงเวลา</th><th class="num">product_id</th><th>product_name</th><th class="num">stock_qty</th></tr></thead>
+          <tbody>
+            <tr><td>ก่อนขาย</td><td class="num">2</td><td>Wireless Mouse</td><td class="num">3</td></tr>
+            <tr><td>หลังขาย 1 ชิ้น</td><td class="num">2</td><td>Wireless Mouse</td><td class="num">2</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="ci">!</div>
+        <div><strong>Cascading Trigger:</strong> ถ้ามี Trigger <code>AFTER UPDATE</code> บน <code>products</code> (แล็บ 1) อยู่ด้วย การลดสต็อกจาก Trigger นี้จะไปกระตุ้น Trigger log ของ products อีกที ทำให้เกิด log <code>old_stock = 3, new_stock = 2</code> โดยอัตโนมัติ — Trigger หนึ่งตัวสามารถทำให้ Trigger อีกตัวทำงานได้</div>
+      </div>
+
+      <div class="callout danger">
+        <div class="ci">!</div>
+        <div><strong>สต็อกติดลบได้:</strong> ถ้าไม่มีใครตรวจว่าสินค้ามีพอ ขาย 5 ชิ้นทั้งที่มี 3 ชิ้นจะทำให้ <code>stock_qty = -2</code> — Trigger ลดสต็อกอย่างเดียวไม่ป้องกันปัญหานี้ ต้องเพิ่ม validation ก่อน INSERT</div>
+      </div>
+
+      <p>เวอร์ชันที่ป้องกันสต็อกไม่พอ (รวม validation ไว้ใน BEFORE INSERT):</p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">10c_validate_stock.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>DELIMITER //
+
+CREATE TRIGGER trg_order_items_before_insert_stock
+BEFORE INSERT ON order_items
+FOR EACH ROW
+BEGIN
+  DECLARE v_stock INT;
+
+  IF NEW.quantity &lt;= 0 THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'Quantity must be more than 0';
+  END IF;
+
+  SELECT stock_qty INTO v_stock
+  FROM products
+  WHERE product_id = NEW.product_id;
+
+  IF v_stock IS NULL THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'Product not found';
+  ELSEIF v_stock &lt; NEW.quantity THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'Not enough stock';
+  END IF;
+END//
+
+DELIMITER ;</code></pre>
+      </div>
+
+      <div class="callout info">
+        <div class="ci">i</div>
+        <div><strong>หมายเหตุ:</strong> Trigger นี้ทำหน้าที่แทน Trigger แล็บ 2 เดิม (ชื่อคล้ายกัน) ควร <code>DROP TRIGGER</code> ตัวเก่าก่อน หรือใช้ชื่อใหม่และทดสอบให้แน่ใจว่าไม่มี validation ซ้ำซ้อน — MySQL 8 รองรับหลาย Trigger ใน event/timing เดียวกัน แต่ลำดับการทำงานต้องระวัง</div>
+      </div>
+
+      <div class="callout warn">
+        <div class="ci">!</div>
+        <div><strong>ระดับโปร:</strong> การตรวจ <code>SELECT stock_qty</code> แล้วค่อย <code>UPDATE</code> ยังมี race condition ถ้ามีคนซื้อพร้อมกันสองรายการ ทั้งคู่อาจเห็นสต็อก 3 แล้วผ่านทั้งคู่ ในระบบจริงควรใช้ locking หรือ atomic update เช่น <code>UPDATE ... WHERE stock_qty &gt;= NEW.quantity</code> แล้วตรวจ <code>ROW_COUNT()</code></div>
+      </div>
+
+      <h3 id="trigger-case">3.9 ใช้ CASE WHEN ภายใน Trigger</h3>
+      <p>นี่คือจุดที่สองหัวข้อบรรจบกัน: หลังมี order ใหม่ ให้อัปเดตยอดซื้อสะสมของลูกค้า และจัดระดับใหม่ด้วย CASE WHEN</p>
+
+      <div class="callout info">
+        <div class="ci">i</div>
+        <div><strong>หลักสำคัญ:</strong> คำนวณยอดใหม่ลงตัวแปร <code>v_new_total</code> ก่อน แล้วใช้ตัวแปรนี้ทั้งใน<strong>การบันทึกยอด</strong>และ<strong>การจัดระดับ</strong> — ช่วยให้อ่านค่าเดิมครั้งเดียวและหลีกเลี่ยงปัญหาบวกซ้ำใน MySQL</div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">11_customer_level_trigger.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>DELIMITER //
+
+CREATE TRIGGER trg_orders_after_insert_level
+AFTER INSERT ON orders
+FOR EACH ROW
+BEGIN
+  DECLARE v_new_total DECIMAL(12,2);
+
+  SELECT total_spending + NEW.total_amount
+    INTO v_new_total
+  FROM customers
+  WHERE customer_id = NEW.customer_id;
+
+  UPDATE customers
+  SET total_spending = v_new_total,
+      customer_level = CASE
+        WHEN v_new_total &gt;= 50000 THEN 'VIP'
+        WHEN v_new_total &gt;= 10000 THEN 'Gold'
+        ELSE 'Standard'
+      END
+  WHERE customer_id = NEW.customer_id;
+END//
+
+DELIMITER ;</code></pre>
+      </div>
+
+      <div class="grid-2">
+        <article class="card">
+          <h4>ลำดับการทำงาน</h4>
+          <ol>
+            <li>มี INSERT order ใหม่</li>
+            <li>Trigger ทำงานหลัง order ถูกบันทึก</li>
+            <li>อ่านยอดเดิม + <code>NEW.total_amount</code> เก็บลง <code>v_new_total</code></li>
+            <li>ใช้ <code>v_new_total</code> จัดระดับด้วย CASE</li>
+            <li>อัปเดตยอดและระดับเฉพาะลูกค้าคนนั้น</li>
+          </ol>
+        </article>
+        <article class="card teal">
+          <h4>ทำไมต้องใช้ v_new_total</h4>
+          <p>เพราะ <code>customer_level</code> ต้องสะท้อนยอด <strong>หลัง</strong> รวม order ใหม่ ไม่ใช่ยอดเก่า ถ้าใช้ <code>total_spending</code> เฉย ๆ ลูกค้าที่เพิ่งข้ามเกณฑ์อาจยังได้ระดับเดิม</p>
+          <p style="margin-bottom:0;">ตัวอย่าง: 48,000 + 5,000 = 53,000 → VIP</p>
+        </article>
+      </div>
+
+      <p>ทดสอบ:</p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">11b_test_level.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>SELECT customer_id, customer_name, total_spending, customer_level
+FROM customers
+WHERE customer_id = 2;
+
+INSERT INTO orders (customer_id, total_amount, status, order_date)
+VALUES (2, 5000.00, 'URGENT', CURDATE());
+
+SELECT customer_id, customer_name, total_spending, customer_level
+FROM customers
+WHERE customer_id = 2;</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>ผลลัพธ์เมื่อเริ่มจาก setup ใหม่</caption>
+          <thead><tr><th>ช่วงเวลา</th><th class="num">total_spending</th><th>customer_level</th></tr></thead>
+          <tbody>
+            <tr><td>ก่อนเพิ่ม order</td><td class="num">48,000.00</td><td><span class="badge badge-gold">Gold</span></td></tr>
+            <tr><td>หลังเพิ่ม order 5,000</td><td class="num">53,000.00</td><td><span class="badge badge-vip">VIP</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout danger">
+        <div class="ci">!</div>
+        <div>
+          <strong>กับดักใน MySQL — อย่าเขียนแบบนี้:</strong> ใน UPDATE ตารางเดียว MySQL ประเมินการกำหนดค่าจากซ้ายไปขวา ดังนั้นถ้าเขียน <code>SET total_spending = total_spending + NEW.total_amount</code> แล้วใช้ <code>total_spending + NEW.total_amount</code> ซ้ำใน CASE ค่า <code>total_spending</code> ที่ CASE เห็นอาจเป็นยอดใหม่ที่บวกไปแล้ว ทำให้คำนวณระดับสูงเกินจริง
+          <br><br>
+          ตัวอย่าง: ลูกค้ามียอด 42,000 และมี order ใหม่ 4,000 → ยอดจริงคือ 46,000 (Gold) แต่ CASE อาจเห็น 50,000 แล้วตัดสินเป็น VIP ผิด ๆ — การใช้ <code>v_new_total</code> จึงปลอดภัยกว่า
+        </div>
+      </div>
+
+      <details class="answer">
+        <summary><span class="ans-tag">สไลด์</span> เทียบกับโค้ดต้นฉบับในสไลด์ (เขียนตรง ๆ)</summary>
+        <div class="answer-body">
+          <div class="code-block">
+            <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">slide_direct_set.sql — เพื่อเทียบเท่านั้น</span><button class="copy-btn" type="button">คัดลอก</button></div>
+            <pre><code>DELIMITER //
+
+CREATE TRIGGER trg_orders_after_insert_level
+AFTER INSERT ON orders
+FOR EACH ROW
+BEGIN
+  UPDATE customers
+  SET total_spending = total_spending + NEW.total_amount,
+      customer_level = CASE
+        WHEN total_spending + NEW.total_amount &gt;= 50000 THEN 'VIP'
+        WHEN total_spending + NEW.total_amount &gt;= 10000 THEN 'Gold'
+        ELSE 'Standard'
+      END
+  WHERE customer_id = NEW.customer_id;
+END//
+
+DELIMITER ;</code></pre>
+          </div>
+          <p style="margin-bottom:0;">นี่คือ pattern ที่ปรากฏในสไลด์ — ถ้าอาจารย์ต้องการให้เขียนตามสไลด์ ให้เขียนแบบนี้ได้ แต่พึงระวังพฤติกรรมการประเมินค่าใน MySQL ตามที่อธิบายด้านบน และใช้เวอร์ชัน <code>v_new_total</code> เมื่อต้องการผลลัพธ์ที่แน่นอน</p>
+        </div>
+      </details>
+
+      <div class="callout info">
+        <div class="ci">i</div>
+        <div><strong>กฎการ DECLARE:</strong> ใน MySQL คำสั่ง <code>DECLARE</code> ต้องอยู่ต้น block <code>BEGIN ... END</code> ก่อนคำสั่งอื่นเสมอ ถ้าย้ายไปไว้หลัง <code>SELECT</code> จะเกิด syntax error</div>
+      </div>
+
+      <h3>3.10 แล็บ 4: รวมยอดลูกค้า + จัดระดับ + บันทึก Audit</h3>
+      <p><strong>โจทย์จากไฟล์แล็บ:</strong> สร้าง Trigger หลัง INSERT ตาราง <code>orders</code> เพื่ออัปเดต <code>total_spending</code> และ <code>customer_level</code> ด้วย CASE WHEN (VIP ≥ 50,000, Gold ≥ 10,000, otherwise Standard) และเพิ่มหนึ่งแถวลง <code>order_audit</code></p>
+
+      <div class="callout warn">
+        <div class="ci">!</div>
+        <div>
+          <strong>ก่อนสร้าง Trigger แล็บ 4:</strong> ถ้าเพิ่งสร้าง Trigger จากหัวข้อ 3.6 หรือ 3.9 ไว้ ให้ลบตัวเก่าหรือรัน setup ใหม่ก่อน เพราะ Trigger หลายตัวบน <code>orders</code> เหตุการณ์เดียวกันจะทำงาน<strong>ทั้งหมด</strong> ทำให้ยอดลูกค้าถูกบวกซ้ำและ audit มีหลายแถว — และถ้าเคยทดสอบ INSERT order ไปแล้ว ควร reset ข้อมูลเพื่อให้ยอดตรงกับตัวอย่าง
+          <div class="code-block" style="margin:.7rem 0 0;">
+            <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">cleanup_before_lab4.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+            <pre><code>DROP TRIGGER IF EXISTS trg_orders_after_insert;
+DROP TRIGGER IF EXISTS trg_orders_after_insert_level;
+DROP TRIGGER IF EXISTS trg_orders_after_insert_full;</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">12_full_order_trigger.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>DELIMITER //
+
+CREATE TRIGGER trg_orders_after_insert_full
+AFTER INSERT ON orders
+FOR EACH ROW
+BEGIN
+  DECLARE v_new_total DECIMAL(12,2);
+
+  -- 1) คำนวณยอดใหม่ก่อน
+  SELECT total_spending + NEW.total_amount
+    INTO v_new_total
+  FROM customers
+  WHERE customer_id = NEW.customer_id;
+
+  -- 2) อัปเดตยอดและระดับลูกค้า
+  UPDATE customers
+  SET total_spending = v_new_total,
+      customer_level = CASE
+        WHEN v_new_total &gt;= 50000 THEN 'VIP'
+        WHEN v_new_total &gt;= 10000 THEN 'Gold'
+        ELSE 'Standard'
+      END
+  WHERE customer_id = NEW.customer_id;
+
+  -- 3) บันทึก audit
+  INSERT INTO order_audit(order_id, action_name, action_time, note)
+  VALUES (
+    NEW.order_id,
+    'INSERT',
+    NOW(),
+    CONCAT('amount=', NEW.total_amount)
+  );
+END//
+
+DELIMITER ;</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ขั้นตอน</th><th>คำสั่ง</th><th>เหตุผล</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><code>SELECT ... INTO v_new_total</code></td><td>คำนวณยอดสะสมใหม่ครั้งเดียว กันปัญหาบวกซ้ำ</td></tr>
+            <tr><td>2</td><td><code>UPDATE customers ... CASE ...</code></td><td>ใช้ CASE จัดระดับจากยอดใหม่</td></tr>
+            <tr><td>3</td><td><code>INSERT INTO order_audit ...</code></td><td>บันทึกเหตุการณ์หลัง order ถูกเพิ่มสำเร็จ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>ทดสอบทั้งกระบวนการ:</p>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">12b_test_full_trigger.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>-- ก่อน
+SELECT customer_id, total_spending, customer_level
+FROM customers
+WHERE customer_id = 2;
+
+-- เพิ่ม order ใหม่
+INSERT INTO orders (customer_id, total_amount, status, order_date)
+VALUES (2, 5000.00, 'URGENT', CURDATE());
+
+-- ดู order id ที่เพิ่งสร้าง
+SELECT LAST_INSERT_ID() AS new_order_id;
+
+-- หลัง
+SELECT customer_id, total_spending, customer_level
+FROM customers
+WHERE customer_id = 2;
+
+SELECT * FROM order_audit
+ORDER BY audit_id DESC;</code></pre>
+      </div>
+
+      <div class="grid-2">
+        <div class="table-wrap" style="margin-top:0;">
+          <table>
+            <caption>ผลลัพธ์ customers (เริ่มจาก setup ใหม่)</caption>
+            <thead><tr><th class="num">customer_id</th><th class="num">total_spending</th><th>customer_level</th></tr></thead>
+            <tbody>
+              <tr><td class="num">2</td><td class="num">53,000.00</td><td><span class="badge badge-vip">VIP</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap" style="margin-top:0;">
+          <table>
+            <caption>ผลลัพธ์ order_audit</caption>
+            <thead><tr><th class="num">order_id</th><th>action_name</th><th>note</th></tr></thead>
+            <tbody>
+              <tr><td class="num">2001</td><td><span class="badge badge-done">INSERT</span></td><td class="mono">amount=5000.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="table-note">ตัวเลข 2001 และ audit_id 1 สมมติว่าเริ่มจาก setup ใหม่ — ถ้าเคยทดสอบ order มาก่อน ค่าจะขยับตาม AUTO_INCREMENT</p>
+
+      <div class="callout warn">
+        <div class="ci">!</div>
+        <div>
+          <strong>ระวัง Audit ซ้ำ:</strong> ถ้ามี Trigger audit เดิม <code>trg_orders_after_insert</code> อยู่แล้ว และ Trigger แล็บ 4 ก็ INSERT audit ด้วย จะได้ <strong>2 แถว</strong> สำหรับ order เดียว
+          <br><br>
+          เลือกสถาปัตยกรรมอย่างใดอย่างหนึ่ง: (A) Trigger หนึ่งทำงานเดียว — audit trigger แยก, level trigger แยก หรือ (B) Trigger เดียวทำทั้งสองอย่าง แต่ต้องไม่มี Trigger audit ตัวอื่นทำงานซ้ำ
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>แนวทาง</th><th>ข้อดี</th><th>ข้อควรระวัง</th></tr></thead>
+          <tbody>
+            <tr><td><strong>A. แยก Trigger ตามหน้าที่</strong><br>audit 1 ตัว + level 1 ตัว</td><td>อ่านง่าย แก้ไขแยกกันได้</td><td>MySQL 8 ต้องกำหนดลำดับด้วย <code>FOLLOWS</code> / <code>PRECEDES</code> ถ้าลำดับสำคัญ</td></tr>
+            <tr><td><strong>B. Trigger เดียวทำทั้งหมด</strong></td><td>ควบคุมลำดับใน block เดียว ชัดเจน</td><td>block ยาวขึ้น และต้องระวัง Trigger อื่นที่อาจซ้ำ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.11 ดูและลบ Trigger</h3>
+      <div class="code-block">
+        <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">13_manage_triggers.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+        <pre><code>-- ดู Trigger ทั้งหมดในฐานข้อมูลปัจจุบัน
+SHOW TRIGGERS;
+
+-- ดูคำสั่งสร้าง Trigger แบบเต็ม
+SHOW CREATE TRIGGER trg_orders_after_insert_full;
+
+-- ดูผ่าน information_schema
+SELECT TRIGGER_NAME, EVENT_MANIPULATION, ACTION_TIMING,
+       EVENT_OBJECT_TABLE, ACTION_STATEMENT
+FROM information_schema.TRIGGERS
+WHERE TRIGGER_SCHEMA = DATABASE();
+
+-- ลบ Trigger
+DROP TRIGGER IF EXISTS trg_orders_after_insert_full;</code></pre>
+      </div>
+
+      <div class="callout exam">
+        <div class="ci">!</div>
+        <div><strong>MySQL ไม่มี <code>ALTER TRIGGER</code></strong> — ถ้าต้องแก้ Trigger ต้อง <code>DROP TRIGGER</code> แล้ว <code>CREATE TRIGGER</code> ใหม่ (ต่างจากบาง DBMS) และชื่อ Trigger ต้องไม่ซ้ำภายใน schema เดียวกัน</div>
+      </div>
+
+      <h3 id="trigger-rules">3.12 ข้อจำกัดของ Trigger ที่ต้องรู้</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ข้อจำกัด</th><th>รายละเอียด</th><th>ผลที่เกิด</th></tr></thead>
+          <tbody>
+            <tr><td>ห้ามแก้ตารางที่ Trigger ผูกอยู่</td><td>เช่น <code>AFTER INSERT ON orders</code> แล้วพยายาม <code>UPDATE orders</code></td><td><code>ERROR 1442</code> — table already used by statement</td></tr>
+            <tr><td>ห้ามใช้ transaction control</td><td><code>START TRANSACTION</code>, <code>COMMIT</code>, <code>ROLLBACK</code></td><td>Syntax error / ไม่อนุญาตใน Trigger</td></tr>
+            <tr><td>ห้ามใช้ dynamic SQL</td><td><code>PREPARE</code>, <code>EXECUTE</code>, <code>DEALLOCATE PREPARE</code></td><td>ไม่อนุญาต</td></tr>
+            <tr><td>ห้ามคืน result set</td><td>Trigger ไม่สามารถส่งผลลัพธ์แบบ SELECT กลับให้ client</td><td>ใช้ตาราง log แทน</td></tr>
+            <tr><td>สร้างบน view / temporary table ไม่ได้</td><td>ต้องเป็น base table</td><td>Error</td></tr>
+            <tr><td>MySQL เป็น row-level only</td><td>ไม่มี <code>FOR EACH STATEMENT</code></td><td>INSERT 100 แถว = Trigger ทำงาน 100 ครั้ง</td></tr>
+            <tr><td>หนึ่ง Trigger ต่อหนึ่ง event</td><td>ไม่สามารถรวม INSERT + UPDATE ในตัวเดียว</td><td>ต้องสร้างแยก</td></tr>
+            <tr><td>NEW/OLD ไม่ส่งต่อไปยัง procedure ที่เรียก</td><td>ถ้า Trigger เรียก procedure ต้องส่งค่าเป็น parameter</td><td>Procedure มองไม่เห็น NEW/OLD</td></tr>
+            <tr><td>FK cascade ไม่กระตุ้น Trigger</td><td>การลบ/แก้ที่เกิดจาก foreign key cascade ไม่ทำให้ Trigger ทำงาน</td><td>อย่าพึ่ง Trigger กับ cascaded FK actions</td></tr>
+            <tr><td>Trigger หลายตัวใน event เดียวกัน</td><td>MySQL 5.7.2+ รองรับ ใช้ <code>FOLLOWS</code>/<code>PRECEDES</code> กำหนดลำดับ</td><td>ลำดับมีผลต่อผลลัพธ์</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout danger">
+        <div class="ci">!</div>
+        <div><strong>กับดักที่ชอบออกสอบ:</strong> Trigger บน <code>orders</code> ไม่สามารถ <code>UPDATE orders</code> ในตัวมันเองได้ เพราะตารางถูกใช้โดย statement ที่เรียก Trigger อยู่ — แต่สามารถ <code>UPDATE customers</code> หรือ <code>INSERT INTO order_audit</code> ซึ่งเป็นคนละตารางได้</div>
+      </div>
+
+      <h3>3.13 Best Practices ในการเขียน Trigger</h3>
+      <div class="grid-2">
+        <article class="card">
+          <h4>ควรทำ</h4>
+          <ul>
+            <li>ตั้งชื่อให้สื่อ: <code>trg_&lt;table&gt;_&lt;timing&gt;_&lt;event&gt;</code></li>
+            <li>หนึ่ง Trigger หนึ่งหน้าที่ชัดเจน</li>
+            <li>Validate ด้วย <code>BEFORE</code>, Audit ด้วย <code>AFTER</code></li>
+            <li>ใช้ <code>SIGNAL</code> พร้อมข้อความที่เข้าใจง่าย</li>
+            <li>ทดสอบด้วย SELECT ก่อน/หลังทุกครั้ง</li>
+            <li>เก็บ SQL สร้าง Trigger ไว้ใน version control</li>
+            <li>เขียน comment อธิบาย business rule</li>
+          </ul>
+        </article>
+        <article class="card rose">
+          <h4>ไม่ควรทำ</h4>
+          <ul>
+            <li>ยัด business logic ทั้งระบบไว้ใน Trigger</li>
+            <li>เขียน Trigger ที่เรียกงานหนัก ๆ ต่อแถว</li>
+            <li>พึ่ง Trigger แทน foreign key หรือ constraint พื้นฐาน</li>
+            <li>ลืมว่า Trigger ทำงานซ้ำเมื่อ insert หลายแถว</li>
+            <li>สร้าง audit ซ้ำจากหลาย Trigger</li>
+            <li>ละเลย error handling และ rollback behavior</li>
+            <li>แก้ Trigger ใน production โดยไม่มี script</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="callout success">
+        <div class="ci">✓</div>
+        <div><strong>Debug อย่างเป็นระบบ:</strong> 1) ดูว่า Trigger ถูกสร้างจริงด้วย <code>SHOW TRIGGERS</code> 2) ทดสอบ DML ทีละแถว 3) ตรวจ log table 4) ถ้า error ให้อ่านรหัส error และบรรทัดที่ชี้ 5) ลอง drop แล้วสร้างใหม่ในฐานข้อมูลทดสอบ</div>
+      </div>
+
+      <h3>3.14 เสริม: Trigger vs Stored Procedure vs CHECK constraint</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th>Trigger</th><th>Stored Procedure</th><th>CHECK constraint</th></tr></thead>
+          <tbody>
+            <tr><td><strong>เรียกเมื่อไร</strong></td><td>อัตโนมัติเมื่อเกิด DML</td><td>เมื่อผู้ใช้ <code>CALL</code></td><td>อัตโนมัติตอน INSERT/UPDATE</td></tr>
+            <tr><td><strong>เหมาะกับ</strong></td><td>Audit, cascade, cross-table validation</td><td>กระบวนการหลายขั้น, logic ที่เรียกซ้ำ</td><td>Validation ง่าย ๆ ในแถวเดียว</td></tr>
+            <tr><td><strong>คืน result set</strong></td><td>ไม่ได้</td><td>ได้</td><td>ไม่ได้</td></tr>
+            <tr><td><strong>ใช้ NEW/OLD</strong></td><td>ได้</td><td>ไม่ได้</td><td>ไม่ได้</td></tr>
+            <tr><td><strong>ตัวอย่าง</strong></td><td>ลด stock หลังขาย</td><td>คำนวณใบเสร็จหลายขั้น</td><td><code>CHECK (quantity &gt; 0)</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>ถ้าเป็นการตรวจง่าย ๆ เช่น <code>quantity &gt; 0</code> และใช้ MySQL 8.0.16+ การใช้ <code>CHECK</code> constraint อาจเรียบง่ายกว่า แต่ถ้าต้องการข้อความ error เอง ตรวจข้ามตาราง หรือเขียน audit log ต้องใช้ Trigger</p>
+
+      <h3>3.15 สรุปแล็บทั้ง 4 ข้อ</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">แล็บ</th><th>ตาราง</th><th>Timing + Event</th><th>ทำอะไร</th><th>แนวคิดสำคัญ</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td class="mono">products</td><td><code>AFTER UPDATE</code></td><td>บันทึก <code>product_id</code>, <code>old_stock</code>, <code>new_stock</code>, <code>update_time</code> ลง <code>product_stock_log</code></td><td>ใช้ <code>OLD</code> + <code>NEW</code></td></tr>
+            <tr><td class="num">2</td><td class="mono">order_items</td><td><code>BEFORE INSERT</code></td><td>ห้าม <code>quantity &lt;= 0</code> ด้วย <code>SIGNAL</code></td><td>Validation ก่อนบันทึก</td></tr>
+            <tr><td class="num">3</td><td class="mono">order_items</td><td><code>AFTER INSERT</code></td><td>ลด <code>products.stock_qty</code> ตาม <code>NEW.quantity</code></td><td>อัปเดตตารางอื่น</td></tr>
+            <tr><td class="num">4</td><td class="mono">orders</td><td><code>AFTER INSERT</code></td><td>อัปเดต <code>customers.total_spending</code> + <code>customer_level</code> ด้วย CASE + audit</td><td>รวม CASE กับ Trigger</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="memory-box">
+        <h4>ถ้าจำแล็บได้ทั้งหมดนี้ = พร้อมสอบภาคปฏิบัติ</h4>
+        <ul style="margin-bottom:0;">
+          <li><strong>แล็บ 1:</strong> UPDATE products → log old/new (AFTER UPDATE)</li>
+          <li><strong>แล็บ 2:</strong> INSERT order_items → reject qty ≤ 0 (BEFORE INSERT + SIGNAL)</li>
+          <li><strong>แล็บ 3:</strong> INSERT order_items → stock -= qty (AFTER INSERT)</li>
+          <li><strong>แล็บ 4:</strong> INSERT orders → customer total + level + audit (AFTER INSERT + CASE)</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== 04 DATA ===== -->
+    <section class="section" id="data">
+      <div class="section-head">
+        <div class="section-num">04</div>
+        <div>
+          <p class="kicker">ภาคผนวกข้อมูล</p>
+          <h2>ชุดข้อมูลและผลลัพธ์ที่ควรได้</h2>
+          <p class="section-sub">ข้อมูลด้านล่างมาจากไฟล์ <code>sql_case_when_trigger_lab_data.sql</code> ใช้ตอบโจทย์ทั้ง CASE WHEN และ Trigger — ถ้าทดลอง inserts/updates ไปแล้ว ตัวเลขบางค่าอาจเปลี่ยน ให้ยึด “ข้อมูลตั้งต้น” ในหน้านี้เป็นหลัก</p>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="ci">!</div>
+        <div><strong>ก่อนเริ่มแล็บ:</strong> ไฟล์ setup มี <code>DROP DATABASE IF EXISTS sql_case_trigger_lab;</code> — รันในฐานข้อมูลแล็บเท่านั้น อย่ารันในฐานข้อมูลจริง เพราะจะลบข้อมูลเดิมทั้งหมด</div>
+      </div>
+
+      <h3>4.1 students — ใช้กับ CASE แปลงเกรด</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">student_id</th><th>student_name</th><th class="num">score</th><th>grade (ก่อน UPDATE)</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td>Somchai</td><td class="num">95</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+            <tr><td class="num">2</td><td>Suda</td><td class="num">84</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+            <tr><td class="num">3</td><td>Narin</td><td class="num">76</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+            <tr><td class="num">4</td><td>Mali</td><td class="num">68</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+            <tr><td class="num">5</td><td>Anan</td><td class="num">54</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+            <tr><td class="num">6</td><td>Pim</td><td class="num">49</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+            <tr><td class="num">7</td><td>Krit</td><td class="num">100</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+            <tr><td class="num">8</td><td>Dao</td><td class="num">73</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+            <tr><td class="num">9</td><td>Beam</td><td class="num">61</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+            <tr><td class="num">10</td><td>Fah</td><td class="num">57</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+            <tr><td class="num">11</td><td>June</td><td class="num">88</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+            <tr><td class="num">12</td><td>Ton</td><td class="num">35</td><td><span class="badge badge-neutral">NULL</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>4.2 products — ใช้กับ CASE สถานะสต็อก และ Trigger ลดสต็อก</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">product_id</th><th>product_name</th><th>category</th><th class="num">unit_price</th><th class="num">stock_qty</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td>USB Flash Drive 32GB</td><td>Computer</td><td class="num">250.00</td><td class="num">0</td></tr>
+            <tr><td class="num">2</td><td>Wireless Mouse</td><td>Computer</td><td class="num">390.00</td><td class="num">3</td></tr>
+            <tr><td class="num">3</td><td>Keyboard</td><td>Computer</td><td class="num">690.00</td><td class="num">7</td></tr>
+            <tr><td class="num">4</td><td>Notebook A5</td><td>Stationery</td><td class="num">45.00</td><td class="num">15</td></tr>
+            <tr><td class="num">5</td><td>Ball Pen Blue</td><td>Stationery</td><td class="num">12.00</td><td class="num">120</td></tr>
+            <tr><td class="num">6</td><td>Printer Ink</td><td>Office</td><td class="num">1,250.00</td><td class="num">8</td></tr>
+            <tr><td class="num">7</td><td>HDMI Cable</td><td>Computer</td><td class="num">180.00</td><td class="num">25</td></tr>
+            <tr><td class="num">8</td><td>Desk Lamp</td><td>Office</td><td class="num">850.00</td><td class="num">10</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>4.3 customers — ใช้กับ CASE จัดระดับ และ Trigger อัปเดตยอดสะสม</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">customer_id</th><th>customer_name</th><th class="num">total_spending</th><th>customer_level</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td>Somchai Retail</td><td class="num">8,000.00</td><td><span class="badge badge-standard">Standard</span></td></tr>
+            <tr><td class="num">2</td><td>Suda Shop</td><td class="num">48,000.00</td><td><span class="badge badge-gold">Gold</span></td></tr>
+            <tr><td class="num">3</td><td>Narin Co.</td><td class="num">0.00</td><td><span class="badge badge-standard">Standard</span></td></tr>
+            <tr><td class="num">4</td><td>Mali Office</td><td class="num">15,000.00</td><td><span class="badge badge-gold">Gold</span></td></tr>
+            <tr><td class="num">5</td><td>Anan Trading</td><td class="num">62,000.00</td><td><span class="badge badge-vip">VIP</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">ยอด <code>total_spending</code> ตั้งต้นสอดคล้องกับผลรวม <code>orders.total_amount</code> ของลูกค้าแต่ละราย</p>
+
+      <h3>4.4 orders — ใช้กับ CASE เรียงลำดับ, แปลงสถานะ และ Trigger</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">order_id</th><th class="num">customer_id</th><th class="num">total_amount</th><th>status</th><th>order_date</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1001</td><td class="num">1</td><td class="num">5,000.00</td><td><span class="badge badge-waiting">WAITING</span></td><td>2026-09-01</td></tr>
+            <tr><td class="num">1002</td><td class="num">1</td><td class="num">3,000.00</td><td><span class="badge badge-done">DONE</span></td><td>2026-09-03</td></tr>
+            <tr><td class="num">1003</td><td class="num">2</td><td class="num">18,000.00</td><td><span class="badge badge-done">DONE</span></td><td>2026-09-05</td></tr>
+            <tr><td class="num">1004</td><td class="num">2</td><td class="num">30,000.00</td><td><span class="badge badge-waiting">WAITING</span></td><td>2026-09-10</td></tr>
+            <tr><td class="num">1005</td><td class="num">4</td><td class="num">15,000.00</td><td><span class="badge badge-urgent">URGENT</span></td><td>2026-09-12</td></tr>
+            <tr><td class="num">1006</td><td class="num">5</td><td class="num">52,000.00</td><td><span class="badge badge-done">DONE</span></td><td>2026-09-15</td></tr>
+            <tr><td class="num">1007</td><td class="num">5</td><td class="num">10,000.00</td><td><span class="badge badge-done">DONE</span></td><td>2026-09-20</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">หลัง setup มีการตั้ง <code>ALTER TABLE orders AUTO_INCREMENT = 2001;</code> ดังนั้น order ใหม่จะเริ่มที่ 2001 (หรือค่าถัดไป)</p>
+
+      <h3>4.5 order_items — ใช้กับ Trigger ตรวจสอบและลดสต็อก</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">order_item_id</th><th class="num">order_id</th><th class="num">product_id</th><th class="num">quantity</th><th class="num">unit_price</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td class="num">1001</td><td class="num">2</td><td class="num">2</td><td class="num">390.00</td></tr>
+            <tr><td class="num">2</td><td class="num">1001</td><td class="num">4</td><td class="num">10</td><td class="num">45.00</td></tr>
+            <tr><td class="num">3</td><td class="num">1002</td><td class="num">7</td><td class="num">5</td><td class="num">180.00</td></tr>
+            <tr><td class="num">4</td><td class="num">1003</td><td class="num">6</td><td class="num">4</td><td class="num">1,250.00</td></tr>
+            <tr><td class="num">5</td><td class="num">1004</td><td class="num">8</td><td class="num">2</td><td class="num">850.00</td></tr>
+            <tr><td class="num">6</td><td class="num">1005</td><td class="num">3</td><td class="num">3</td><td class="num">690.00</td></tr>
+            <tr><td class="num">7</td><td class="num">1006</td><td class="num">5</td><td class="num">100</td><td class="num">12.00</td></tr>
+            <tr><td class="num">8</td><td class="num">1007</td><td class="num">2</td><td class="num">1</td><td class="num">390.00</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">หลัง setup มีการตั้ง <code>ALTER TABLE order_items AUTO_INCREMENT = 3001;</code> ดังนั้นรายการใหม่จะเริ่มที่ 3001</p>
+
+      <h3>4.6 ตาราง log ทั้งสองเริ่มต้นว่าง</h3>
+      <div class="grid-2">
+        <div class="table-wrap" style="margin-top:0;">
+          <table>
+            <caption>order_audit</caption>
+            <thead><tr><th class="num">audit_id</th><th class="num">order_id</th><th>action_name</th><th>action_time</th><th>note</th></tr></thead>
+            <tbody>
+              <tr><td colspan="5" style="text-align:center;color:var(--muted);">— ยังไม่มีข้อมูล —</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap" style="margin-top:0;">
+          <table>
+            <caption>product_stock_log</caption>
+            <thead><tr><th class="num">log_id</th><th class="num">product_id</th><th class="num">old_stock</th><th class="num">new_stock</th><th>action_name</th><th>update_time</th></tr></thead>
+            <tbody>
+              <tr><td colspan="6" style="text-align:center;color:var(--muted);">— ยังไม่มีข้อมูล —</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3>4.7 ตารางสรุปผลลัพธ์ที่ควรได้</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>โจทย์</th><th>ผลลัพธ์หลัก</th></tr></thead>
+          <tbody>
+            <tr><td>CASE แปลงเกรด</td><td>Somchai 95 → A, Narin 76 → B, Mali 68 → C, Anan 54 → D, Pim 49 → F</td></tr>
+            <tr><td>CASE สถานะสต็อก</td><td>product 1 → Out of stock, product 2/3/6/8 → Low, product 4/5/7 → Available</td></tr>
+            <tr><td>CASE priority</td><td>URGENT 1 → WAITING 2 → DONE 3 → อื่น ๆ 4</td></tr>
+            <tr><td>CASE ระดับลูกค้า</td><td>customer 1 Standard, 2 Gold, 4 Gold, 5 VIP (customer 3 ไม่มี order จึงไม่ปรากฏ)</td></tr>
+            <tr><td>Trigger แล็บ 1</td><td>product 3: old 7 → new 12 หลังบวก 5</td></tr>
+            <tr><td>Trigger แล็บ 2</td><td>quantity 0 → ERROR 1644 (45000)</td></tr>
+            <tr><td>Trigger แล็บ 3</td><td>product 2: stock 3 → 2 หลังขาย 1 ชิ้น</td></tr>
+            <tr><td>Trigger แล็บ 4</td><td>customer 2: 48,000 Gold → 53,000 VIP + audit 1 แถว</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== 05 PRACTICE ===== -->
+    <section class="section" id="practice">
+      <div class="section-head">
+        <div class="section-num">05</div>
+        <div>
+          <p class="kicker">ลงมือทำ</p>
+          <h2>แบบฝึกหัด + ข้อสอบจำลอง</h2>
+          <p class="section-sub">ลองเขียนคำตอบเองก่อนเปิดเฉลย — ถ้าทำได้ทั้ง 5 ข้อ CASE และ 4 ข้อ Trigger เท่ากับครอบคลุมโจทย์ภาคปฏิบัติเกือบทั้งหมดของบทนี้</p>
+        </div>
+      </div>
+
+      <div class="practice-toolbar">
+        <span class="pt-label">เฉลยถูกซ่อนไว้เพื่อให้ลองคิดเองก่อน</span>
+        <div class="pt-actions">
+          <button class="btn btn-light btn-sm" type="button" data-answer-action="open">เปิดเฉลยทั้งหมด</button>
+          <button class="btn btn-light btn-sm" type="button" data-answer-action="close">ปิดเฉลยทั้งหมด</button>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <div class="ci">i</div>
+        <div><strong>ก่อนลงมือ:</strong> ถ้าเพิ่งรันแล็บหรือทดสอบในหัวข้อ 03 แล้ว แนะนำให้รัน <code>sql_case_when_trigger_lab_data.sql</code> ใหม่ก่อนเริ่มแบบฝึกหัดนี้ เพราะข้อมูลทดสอบและ Trigger จากข้อก่อนหน้าอาจทำให้ผลลัพธ์ไม่ตรงกับเฉลย</div>
+      </div>
+
+      <h3>5.1 แบบฝึกหัด CASE WHEN</h3>
+
+      <div class="lab">
+        <div class="lab-head"><div class="lab-num">01</div><div><h4>แสดงเกรดของนักศึกษา</h4><p class="prompt">แสดง <code>student_id</code>, <code>student_name</code>, <code>score</code> และ <code>grade_result</code> จากตาราง <code>students</code> โดยใช้เกณฑ์ A ≥ 80, B ≥ 70, C ≥ 60, D ≥ 50, ที่เหลือ F</p></div></div>
+        <details class="answer">
+          <summary><span class="ans-tag">เฉลย</span> ดูคำสั่ง SQL และคำอธิบาย</summary>
+          <div class="answer-body">
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">lab_case_01.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+              <pre><code>SELECT
+  student_id,
+  student_name,
+  score,
+  CASE
+    WHEN score &gt;= 80 THEN 'A'
+    WHEN score &gt;= 70 THEN 'B'
+    WHEN score &gt;= 60 THEN 'C'
+    WHEN score &gt;= 50 THEN 'D'
+    ELSE 'F'
+  END AS grade_result
+FROM students
+ORDER BY student_id;</code></pre>
+            </div>
+            <p style="margin-bottom:0;">จุดสำคัญ: เรียงเงื่อนไขจากคะแนนมากไปน้อย และมี <code>ELSE 'F'</code> ครอบคลุมคะแนนที่ต่ำกว่า 50</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><div class="lab-num">02</div><div><h4>จัดสถานะสต็อกสินค้า</h4><p class="prompt">แสดง <code>product_id</code>, <code>product_name</code>, <code>stock_qty</code> และ <code>stock_status</code> โดย 0 = Out of stock, 1–10 = Low, มากกว่า 10 = Available</p></div></div>
+        <details class="answer">
+          <summary><span class="ans-tag">เฉลย</span> ดูคำสั่ง SQL และผลลัพธ์</summary>
+          <div class="answer-body">
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">lab_case_02.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+              <pre><code>SELECT
+  product_id,
+  product_name,
+  stock_qty,
+  CASE
+    WHEN stock_qty = 0 THEN 'Out of stock'
+    WHEN stock_qty BETWEEN 1 AND 10 THEN 'Low'
+    ELSE 'Available'
+  END AS stock_status
+FROM products
+ORDER BY product_id;</code></pre>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th class="num">product_id</th><th>product_name</th><th class="num">stock_qty</th><th>stock_status</th></tr></thead>
+                <tbody>
+                  <tr><td class="num">1</td><td>USB Flash Drive 32GB</td><td class="num">0</td><td><span class="badge badge-out">Out of stock</span></td></tr>
+                  <tr><td class="num">2</td><td>Wireless Mouse</td><td class="num">3</td><td><span class="badge badge-low">Low</span></td></tr>
+                  <tr><td class="num">3</td><td>Keyboard</td><td class="num">7</td><td><span class="badge badge-low">Low</span></td></tr>
+                  <tr><td class="num">4</td><td>Notebook A5</td><td class="num">15</td><td><span class="badge badge-available">Available</span></td></tr>
+                  <tr><td class="num">5</td><td>Ball Pen Blue</td><td class="num">120</td><td><span class="badge badge-available">Available</span></td></tr>
+                  <tr><td class="num">6</td><td>Printer Ink</td><td class="num">8</td><td><span class="badge badge-low">Low</span></td></tr>
+                  <tr><td class="num">7</td><td>HDMI Cable</td><td class="num">25</td><td><span class="badge badge-available">Available</span></td></tr>
+                  <tr><td class="num">8</td><td>Desk Lamp</td><td class="num">10</td><td><span class="badge badge-low">Low</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="margin-bottom:0;">สังเกตว่า <code>BETWEEN 1 AND 10</code> รวม 10 ด้วย ดังนั้น product 8 (stock 10) จึงเป็น Low</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><div class="lab-num">03</div><div><h4>กำหนดลำดับความสำคัญของ order</h4><p class="prompt">แสดง <code>order_id</code>, <code>status</code> และ <code>priority_no</code> โดย URGENT = 1, WAITING = 2, DONE = 3, อื่น ๆ = 4</p></div></div>
+        <details class="answer">
+          <summary><span class="ans-tag">เฉลย</span> ดูคำสั่ง SQL</summary>
+          <div class="answer-body">
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">lab_case_03.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+              <pre><code>SELECT
+  order_id,
+  status,
+  CASE
+    WHEN status = 'URGENT' THEN 1
+    WHEN status = 'WAITING' THEN 2
+    WHEN status = 'DONE' THEN 3
+    ELSE 4
+  END AS priority_no
+FROM orders
+ORDER BY priority_no, order_date DESC;</code></pre>
+            </div>
+            <p style="margin-bottom:0;">ถ้าต้องการเรียงผลลัพธ์ตาม priority จริง ให้เพิ่ม <code>ORDER BY priority_no</code> — ใน MySQL สามารถอ้าง alias ใน ORDER BY ได้</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><div class="lab-num">04</div><div><h4>อัปเดตเกรดลงตาราง</h4><p class="prompt">อัปเดต <code>students.grade</code> ตามคะแนน โดยต้องตรวจ SELECT ก่อน UPDATE และควรป้องกันกรณี score เป็น NULL</p></div></div>
+        <details class="answer">
+          <summary><span class="ans-tag">เฉลย</span> ดูคำสั่ง SQL</summary>
+          <div class="answer-body">
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">lab_case_04.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+              <pre><code>-- ตรวจก่อน
+SELECT student_id, student_name, score,
+       CASE
+         WHEN score IS NULL THEN NULL
+         WHEN score &gt;= 80 THEN 'A'
+         WHEN score &gt;= 70 THEN 'B'
+         WHEN score &gt;= 60 THEN 'C'
+         WHEN score &gt;= 50 THEN 'D'
+         ELSE 'F'
+       END AS grade_preview
+FROM students;
+
+-- อัปเดตจริง
+UPDATE students
+SET grade = CASE
+  WHEN score IS NULL THEN NULL
+  WHEN score &gt;= 80 THEN 'A'
+  WHEN score &gt;= 70 THEN 'B'
+  WHEN score &gt;= 60 THEN 'C'
+  WHEN score &gt;= 50 THEN 'D'
+  ELSE 'F'
+END;</code></pre>
+            </div>
+            <p style="margin-bottom:0;">ถ้าต้องการอัปเดตเฉพาะบางคน ให้เพิ่ม <code>WHERE student_id = ...</code> — และอย่าลืมว่า UPDATE ที่ไม่มี WHERE กระทบทุกแถว</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><div class="lab-num">05</div><div><h4>แปลงสถานะตามยอดเงิน (โจทย์เสริมจากไฟล์แบบฝึก)</h4><p class="prompt">แสดง <code>order_id</code>, <code>total_amount</code>, <code>old_status</code> และ <code>new_status</code> โดยถ้ายอด ≥ 50,000 ให้เป็น URGENT; ถ้ายอด &lt; 50,000 และสถานะเดิมเป็น URGENT ให้เป็น WAITING; นอกนั้นคงสถานะเดิม</p></div></div>
+        <details class="answer">
+          <summary><span class="ans-tag">เฉลย</span> ดูคำสั่ง SQL และผลลัพธ์</summary>
+          <div class="answer-body">
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">lab_case_05.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+              <pre><code>SELECT
+  order_id,
+  total_amount,
+  status AS old_status,
+  CASE
+    WHEN total_amount &gt;= 50000 THEN 'URGENT'
+    WHEN total_amount &lt; 50000 AND status = 'URGENT' THEN 'WAITING'
+    ELSE status
+  END AS new_status
+FROM orders
+ORDER BY order_id;</code></pre>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th class="num">order_id</th><th class="num">total_amount</th><th>old_status</th><th>new_status</th></tr></thead>
+                <tbody>
+                  <tr><td class="num">1001</td><td class="num">5,000.00</td><td><span class="badge badge-waiting">WAITING</span></td><td><span class="badge badge-waiting">WAITING</span></td></tr>
+                  <tr><td class="num">1002</td><td class="num">3,000.00</td><td><span class="badge badge-done">DONE</span></td><td><span class="badge badge-done">DONE</span></td></tr>
+                  <tr><td class="num">1003</td><td class="num">18,000.00</td><td><span class="badge badge-done">DONE</span></td><td><span class="badge badge-done">DONE</span></td></tr>
+                  <tr><td class="num">1004</td><td class="num">30,000.00</td><td><span class="badge badge-waiting">WAITING</span></td><td><span class="badge badge-waiting">WAITING</span></td></tr>
+                  <tr><td class="num">1005</td><td class="num">15,000.00</td><td><span class="badge badge-urgent">URGENT</span></td><td><span class="badge badge-waiting">WAITING</span></td></tr>
+                  <tr><td class="num">1006</td><td class="num">52,000.00</td><td><span class="badge badge-done">DONE</span></td><td><span class="badge badge-urgent">URGENT</span></td></tr>
+                  <tr><td class="num">1007</td><td class="num">10,000.00</td><td><span class="badge badge-done">DONE</span></td><td><span class="badge badge-done">DONE</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="margin-bottom:0;">ถ้าต้องการบันทึกผล ให้เปลี่ยนเป็น <code>UPDATE orders SET status = CASE ... END;</code> แต่ต้องตรวจสอบก่อนเพราะกระทบทุกแถว</p>
+          </div>
+        </details>
+      </div>
+
+      <h3>5.2 แบบฝึกหัด Trigger</h3>
+
+      <div class="lab">
+        <div class="lab-head"><div class="lab-num">01</div><div><h4>บันทึกการเปลี่ยนแปลงสต็อก</h4><p class="prompt">สร้าง Trigger หลัง UPDATE ตาราง <code>products</code> เพื่อบันทึก <code>product_id</code>, <code>old_stock</code>, <code>new_stock</code>, <code>action_name</code> และ <code>update_time</code> ลง <code>product_stock_log</code></p></div></div>
+        <details class="answer">
+          <summary><span class="ans-tag">เฉลย</span> ดูโค้ดและผลทดสอบ</summary>
+          <div class="answer-body">
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">lab_trigger_01.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+              <pre><code>DELIMITER //
+
+CREATE TRIGGER trg_products_after_update
+AFTER UPDATE ON products
+FOR EACH ROW
+BEGIN
+  INSERT INTO product_stock_log
+    (product_id, old_stock, new_stock, action_name, update_time)
+  VALUES
+    (NEW.product_id, OLD.stock_qty, NEW.stock_qty, 'UPDATE', NOW());
+END//
+
+DELIMITER ;</code></pre>
+            </div>
+            <p>ทดสอบ:</p>
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">lab_trigger_01_test.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+              <pre><code>UPDATE products
+SET stock_qty = stock_qty + 5
+WHERE product_id = 3;
+
+SELECT * FROM product_stock_log
+ORDER BY log_id DESC;</code></pre>
+            </div>
+            <p style="margin-bottom:0;">ผลที่ควรได้: product 3, old_stock 7, new_stock 12, action UPDATE — ถ้าต้องการบันทึกเฉพาะเมื่อสต็อกเปลี่ยนจริง ให้เพิ่ม <code>IF OLD.stock_qty &lt;&gt; NEW.stock_qty THEN ... END IF;</code></p>
+          </div>
+        </details>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><div class="lab-num">02</div><div><h4>ห้ามจำนวนสินค้าติดลบหรือเป็นศูนย์</h4><p class="prompt">สร้าง Trigger ก่อน INSERT ตาราง <code>order_items</code> เพื่อห้าม <code>quantity &lt;= 0</code> พร้อมข้อความ error ที่ชัดเจน</p></div></div>
+        <details class="answer">
+          <summary><span class="ans-tag">เฉลย</span> ดูโค้ดและผลทดสอบ</summary>
+          <div class="answer-body">
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">lab_trigger_02.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+              <pre><code>DELIMITER //
+
+CREATE TRIGGER trg_order_items_before_insert
+BEFORE INSERT ON order_items
+FOR EACH ROW
+BEGIN
+  IF NEW.quantity &lt;= 0 THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'Quantity must be more than 0';
+  END IF;
+END//
+
+DELIMITER ;</code></pre>
+            </div>
+            <p>ทดสอบ:</p>
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">lab_trigger_02_test.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+              <pre><code>INSERT INTO order_items(order_id, product_id, quantity, unit_price)
+VALUES (1001, 2, 0, 390.00);</code></pre>
+            </div>
+            <p style="margin-bottom:0;">ผลที่ควรได้: <code>ERROR 1644 (45000): Quantity must be more than 0</code> และไม่มีแถวใหม่ถูกบันทึก</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><div class="lab-num">03</div><div><h4>ลดสต็อกหลังขาย</h4><p class="prompt">สร้าง Trigger หลัง INSERT ตาราง <code>order_items</code> เพื่อลด <code>stock_qty</code> ของสินค้าตามจำนวนที่ขาย</p></div></div>
+        <details class="answer">
+          <summary><span class="ans-tag">เฉลย</span> ดูโค้ดและผลทดสอบ</summary>
+          <div class="answer-body">
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">lab_trigger_03.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+              <pre><code>DELIMITER //
+
+CREATE TRIGGER trg_order_items_after_insert
+AFTER INSERT ON order_items
+FOR EACH ROW
+BEGIN
+  UPDATE products
+  SET stock_qty = stock_qty - NEW.quantity
+  WHERE product_id = NEW.product_id;
+END//
+
+DELIMITER ;</code></pre>
+            </div>
+            <p>ทดสอบ:</p>
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">lab_trigger_03_test.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+              <pre><code>SELECT product_id, product_name, stock_qty
+FROM products WHERE product_id = 2;
+
+INSERT INTO order_items(order_id, product_id, quantity, unit_price)
+VALUES (1001, 2, 1, 390.00);
+
+SELECT product_id, product_name, stock_qty
+FROM products WHERE product_id = 2;</code></pre>
+            </div>
+            <p style="margin-bottom:0;">ผลที่ควรได้: stock 3 → 2 และถ้ามี Trigger log จากข้อ 1 จะเกิด log <code>old_stock 3, new_stock 2</code> เพิ่มอีกหนึ่งแถว</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><div class="lab-num">04</div><div><h4>อัปเดตยอดลูกค้า + จัดระดับ + Audit</h4><p class="prompt">สร้าง Trigger หลัง INSERT ตาราง <code>orders</code> เพื่ออัปเดต <code>total_spending</code>, <code>customer_level</code> ด้วย CASE WHEN (VIP ≥ 50,000, Gold ≥ 10,000, otherwise Standard) และเพิ่มแถวลง <code>order_audit</code></p></div></div>
+        <details class="answer">
+          <summary><span class="ans-tag">เฉลย</span> ดูโค้ดและผลทดสอบ</summary>
+          <div class="answer-body">
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">lab_trigger_04.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+              <pre><code>DELIMITER //
+
+CREATE TRIGGER trg_orders_after_insert_full
+AFTER INSERT ON orders
+FOR EACH ROW
+BEGIN
+  DECLARE v_new_total DECIMAL(12,2);
+
+  SELECT total_spending + NEW.total_amount
+    INTO v_new_total
+  FROM customers
+  WHERE customer_id = NEW.customer_id;
+
+  UPDATE customers
+  SET total_spending = v_new_total,
+      customer_level = CASE
+        WHEN v_new_total &gt;= 50000 THEN 'VIP'
+        WHEN v_new_total &gt;= 10000 THEN 'Gold'
+        ELSE 'Standard'
+      END
+  WHERE customer_id = NEW.customer_id;
+
+  INSERT INTO order_audit(order_id, action_name, action_time, note)
+  VALUES (NEW.order_id, 'INSERT', NOW(),
+          CONCAT('amount=', NEW.total_amount));
+END//
+
+DELIMITER ;</code></pre>
+            </div>
+            <p>ทดสอบ:</p>
+            <div class="code-block">
+              <div class="code-head"><span class="code-lang">SQL</span><span class="code-title">lab_trigger_04_test.sql</span><button class="copy-btn" type="button">คัดลอก</button></div>
+              <pre><code>SELECT customer_id, total_spending, customer_level
+FROM customers WHERE customer_id = 2;
+
+INSERT INTO orders (customer_id, total_amount, status, order_date)
+VALUES (2, 5000.00, 'URGENT', CURDATE());
+
+SELECT customer_id, total_spending, customer_level
+FROM customers WHERE customer_id = 2;
+
+SELECT * FROM order_audit ORDER BY audit_id DESC;</code></pre>
+            </div>
+            <p style="margin-bottom:0;">ผลที่ควรได้: customer 2 จาก 48,000 Gold → 53,000 VIP และมี audit 1 แถว — ถ้ามี Trigger audit เดิมอยู่แล้ว อย่า INSERT audit ซ้ำในตัวนี้</p>
+          </div>
+        </details>
+      </div>
+
+      <h3>5.3 ข้อสอบจำลอง 12 ข้อ</h3>
+      <p>เลือกคำตอบที่ถูกที่สุด แล้วกด “ตรวจคำตอบ” เพื่อดูคะแนนและคำอธิบาย</p>
+
+      <div class="quiz" id="quiz">
+        <div class="quiz-head">
+          <h3 style="margin:0;">Quiz: CASE WHEN &amp; Trigger</h3>
+          <div class="quiz-controls">
+            <button class="btn btn-primary btn-sm" type="button" id="checkQuiz">ตรวจคำตอบ</button>
+            <button class="btn btn-light btn-sm" type="button" id="resetQuiz">ทำใหม่</button>
+          </div>
+        </div>
+
+        <div class="question" data-answer="a">
+          <p class="q-text"><span class="q-num">01</span><span>จากคำสั่งนี้ ถ้า <code>score = 90</code> จะได้ผลลัพธ์อะไร?<br><code>CASE WHEN score &gt;= 50 THEN 'Pass' WHEN score &gt;= 80 THEN 'Excellent' ELSE 'Fail' END</code></span></p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q1" value="a"><span class="key">A</span><span>Pass</span></label>
+            <label class="option"><input type="radio" name="q1" value="b"><span class="key">B</span><span>Excellent</span></label>
+            <label class="option"><input type="radio" name="q1" value="c"><span class="key">C</span><span>Fail</span></label>
+            <label class="option"><input type="radio" name="q1" value="d"><span class="key">D</span><span>NULL</span></label>
+          </div>
+          <div class="explain"><strong>เฉลย A:</strong> CASE ตรวจจากบนลงล่างและหยุดที่เงื่อนไขแรกที่เป็นจริง — <code>90 &gt;= 50</code> เป็นจริงก่อน จึงได้ Pass และไม่ตรวจ <code>&gt;= 80</code> อีก</div>
+        </div>
+
+        <div class="question" data-answer="c">
+          <p class="q-text"><span class="q-num">02</span><span>ถ้า <code>stock_qty = 15</code> คำสั่งนี้ให้ผลอะไร?<br><code>CASE WHEN stock_qty = 0 THEN 'Out' WHEN stock_qty BETWEEN 1 AND 10 THEN 'Low' END</code></span></p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q2" value="a"><span class="key">A</span><span>Out</span></label>
+            <label class="option"><input type="radio" name="q2" value="b"><span class="key">B</span><span>Low</span></label>
+            <label class="option"><input type="radio" name="q2" value="c"><span class="key">C</span><span>NULL</span></label>
+            <label class="option"><input type="radio" name="q2" value="d"><span class="key">D</span><span>Error</span></label>
+          </div>
+          <div class="explain"><strong>เฉลย C:</strong> ไม่มี <code>ELSE</code> และไม่มีเงื่อนไขใดเป็นจริง (15 ไม่ใช่ 0 และไม่ถึง 10) จึงคืน NULL</div>
+        </div>
+
+        <div class="question" data-answer="b">
+          <p class="q-text"><span class="q-num">03</span><span>ใน <code>AFTER INSERT ON orders</code> ต้องการอ่านค่า order_id ของแถวใหม่ ต้องใช้ตัวใด?</span></p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q3" value="a"><span class="key">A</span><span><code>OLD.order_id</code></span></label>
+            <label class="option"><input type="radio" name="q3" value="b"><span class="key">B</span><span><code>NEW.order_id</code></span></label>
+            <label class="option"><input type="radio" name="q3" value="c"><span class="key">C</span><span><code>NEW.old_order_id</code></span></label>
+            <label class="option"><input type="radio" name="q3" value="d"><span class="key">D</span><span><code>ORDER_ID()</code></span></label>
+          </div>
+          <div class="explain"><strong>เฉลย B:</strong> INSERT มีเฉพาะแถวใหม่ จึงใช้ <code>NEW</code> และใน AFTER INSERT ค่า AUTO_INCREMENT ถูกสร้างแล้ว</div>
+        </div>
+
+        <div class="question" data-answer="b">
+          <p class="q-text"><span class="q-num">04</span><span>ใน Trigger ที่ทำงานกับ <code>DELETE</code> มี row alias ใดใช้ได้?</span></p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q4" value="a"><span class="key">A</span><span><code>NEW</code> เท่านั้น</span></label>
+            <label class="option"><input type="radio" name="q4" value="b"><span class="key">B</span><span><code>OLD</code> เท่านั้น</span></label>
+            <label class="option"><input type="radio" name="q4" value="c"><span class="key">C</span><span>ใช้ได้ทั้ง <code>NEW</code> และ <code>OLD</code></span></label>
+            <label class="option"><input type="radio" name="q4" value="d"><span class="key">D</span><span>ใช้ไม่ได้ทั้งคู่</span></label>
+          </div>
+          <div class="explain"><strong>เฉลย B:</strong> DELETE มีเพียงข้อมูลเดิมที่จะถูกลบ จึงใช้ <code>OLD</code> — ไม่มีแถวใหม่ให้ใช้ <code>NEW</code></div>
+        </div>
+
+        <div class="question" data-answer="b">
+          <p class="q-text"><span class="q-num">05</span><span>ต้องการปฏิเสธ <code>quantity &lt;= 0</code> ควรใช้ Trigger แบบใด?</span></p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q5" value="a"><span class="key">A</span><span><code>AFTER INSERT</code></span></label>
+            <label class="option"><input type="radio" name="q5" value="b"><span class="key">B</span><span><code>BEFORE INSERT</code></span></label>
+            <label class="option"><input type="radio" name="q5" value="c"><span class="key">C</span><span><code>AFTER UPDATE</code></span></label>
+            <label class="option"><input type="radio" name="q5" value="d"><span class="key">D</span><span><code>BEFORE DELETE</code></span></label>
+          </div>
+          <div class="explain"><strong>เฉลย B:</strong> Validation ต้องใช้ BEFORE เพื่อหยุดข้อมูลผิดก่อนถูกเขียนลงตาราง และสามารถแก้ไข <code>NEW</code> ได้ถ้าต้องการ</div>
+        </div>
+
+        <div class="question" data-answer="b">
+          <p class="q-text"><span class="q-num">06</span><span>ข้อใดถูกเกี่ยวกับ <code>NEW</code>?</span></p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q6" value="a"><span class="key">A</span><span>อ่านได้ใน Trigger DELETE</span></label>
+            <label class="option"><input type="radio" name="q6" value="b"><span class="key">B</span><span>แก้ไขค่าได้ใน BEFORE trigger</span></label>
+            <label class="option"><input type="radio" name="q6" value="c"><span class="key">C</span><span>แก้ไขค่าได้ใน AFTER trigger</span></label>
+            <label class="option"><input type="radio" name="q6" value="d"><span class="key">D</span><span>แก้ไขค่าไม่ได้เลย</span></label>
+          </div>
+          <div class="explain"><strong>เฉลย B:</strong> <code>NEW</code> เป็นตัวแทนแถวใหม่และสามารถกำหนดค่าได้ใน BEFORE trigger เช่น <code>SET NEW.created_at = NOW();</code> แต่ AFTER trigger แก้ไม่ได้</div>
+        </div>
+
+        <div class="question" data-answer="c">
+          <p class="q-text"><span class="q-num">07</span><span>Trigger ของ MySQL ทำงานบ่อยแค่ไหน?</span></p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q7" value="a"><span class="key">A</span><span>ครั้งเดียวต่อ statement</span></label>
+            <label class="option"><input type="radio" name="q7" value="b"><span class="key">B</span><span>ครั้งเดียวต่อตาราง</span></label>
+            <label class="option"><input type="radio" name="q7" value="c"><span class="key">C</span><span>ครั้งเดียวต่อแถวที่ได้รับผลกระทบ</span></label>
+            <label class="option"><input type="radio" name="q7" value="d"><span class="key">D</span><span>ครั้งเดียวต่อ transaction</span></label>
+          </div>
+          <div class="explain"><strong>เฉลย C:</strong> MySQL ใช้ row-level trigger และต้องระบุ <code>FOR EACH ROW</code> — INSERT 100 แถวจะทำให้ Trigger ทำงาน 100 ครั้ง</div>
+        </div>
+
+        <div class="question" data-answer="b">
+          <p class="q-text"><span class="q-num">08</span><span>เพราะเหตุใดจึงต้องใช้ <code>DELIMITER //</code> เมื่อสร้าง Trigger?</span></p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q8" value="a"><span class="key">A</span><span>เพราะ server บังคับให้ใช้ <code>//</code> เสมอ</span></label>
+            <label class="option"><input type="radio" name="q8" value="b"><span class="key">B</span><span>เพราะ body ของ Trigger มีเครื่องหมาย <code>;</code> หลายตัว client จึงต้องรู้ว่าคำสั่งยังไม่จบ</span></label>
+            <label class="option"><input type="radio" name="q8" value="c"><span class="key">C</span><span>เพื่อให้ query เร็วขึ้น</span></label>
+            <label class="option"><input type="radio" name="q8" value="d"><span class="key">D</span><span>เพื่อสร้างฐานข้อมูลใหม่</span></label>
+          </div>
+          <div class="explain"><strong>เฉลย B:</strong> <code>DELIMITER</code> เป็นคำสั่งฝั่ง client ใช้เปลี่ยนตัวคั่นชั่วคราว เพื่อไม่ให้ client ตัดจบที่ <code>;</code> ภายใน <code>BEGIN ... END</code></div>
+        </div>
+
+        <div class="question" data-answer="b">
+          <p class="q-text"><span class="q-num">09</span><span><code>SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '...'</code> มีหน้าที่อะไร?</span></p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q9" value="a"><span class="key">A</span><span>ส่ง warning แล้วทำงานต่อ</span></label>
+            <label class="option"><input type="radio" name="q9" value="b"><span class="key">B</span><span>ส่ง error ที่ผู้ใช้กำหนดและยกเลิก statement</span></label>
+            <label class="option"><input type="radio" name="q9" value="c"><span class="key">C</span><span>เขียน log ลงตารางอัตโนมัติ</span></label>
+            <label class="option"><input type="radio" name="q9" value="d"><span class="key">D</span><span>rollback ทั้งฐานข้อมูลทันที</span></label>
+          </div>
+          <div class="explain"><strong>เฉลย B:</strong> <code>SIGNAL</code> ใช้โยน error เอง — SQLSTATE 45000 เป็น user-defined exception และ client จะเห็นเป็น error 1644 พร้อมข้อความที่กำหนด</div>
+        </div>
+
+        <div class="question" data-answer="b">
+          <p class="q-text"><span class="q-num">10</span><span>เกิดอะไรขึ้นถ้า Trigger บน <code>orders</code> พยายาม <code>UPDATE orders</code> ใน <code>AFTER INSERT</code>?</span></p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q10" value="a"><span class="key">A</span><span>ทำงานได้ตามปกติ</span></label>
+            <label class="option"><input type="radio" name="q10" value="b"><span class="key">B</span><span>เกิด error 1442 เพราะตารางถูกใช้โดย statement ที่เรียก Trigger</span></label>
+            <label class="option"><input type="radio" name="q10" value="c"><span class="key">C</span><span>เกิด infinite loop</span></label>
+            <label class="option"><input type="radio" name="q10" value="d"><span class="key">D</span><span>ฐานข้อมูลเพิกเฉยแล้วทำงานต่อ</span></label>
+          </div>
+          <div class="explain"><strong>เฉลย B:</strong> MySQL ไม่อนุญาตให้ Trigger แก้ตารางที่ statement กำลังใช้งานอยู่ — ต้องแก้ตารางอื่นแทน</div>
+        </div>
+
+        <div class="question" data-answer="b">
+          <p class="q-text"><span class="q-num">11</span><span>ต้องการเรียง order ให้ URGENT มาก่อน WAITING แล้วจึง DONE ควรใช้ข้อใด?</span></p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q11" value="a"><span class="key">A</span><span><code>ORDER BY status</code></span></label>
+            <label class="option"><input type="radio" name="q11" value="b"><span class="key">B</span><span><code>ORDER BY CASE WHEN status = 'URGENT' THEN 1 WHEN status = 'WAITING' THEN 2 WHEN status = 'DONE' THEN 3 ELSE 4 END</code></span></label>
+            <label class="option"><input type="radio" name="q11" value="c"><span class="key">C</span><span><code>GROUP BY status</code></span></label>
+            <label class="option"><input type="radio" name="q11" value="d"><span class="key">D</span><span><code>ORDER BY total_amount</code></span></label>
+          </div>
+          <div class="explain"><strong>เฉลย B:</strong> <code>ORDER BY status</code> จะเรียงตามตัวอักษร (DONE, URGENT, WAITING) ซึ่งผิดกฎธุรกิจ ต้องใช้ CASE แปลงสถานะเป็นตัวเลขลำดับ</div>
+        </div>
+
+        <div class="question" data-answer="c">
+          <p class="q-text"><span class="q-num">12</span><span>ข้อใด <strong>ไม่ได้รับอนุญาต</strong> ภายใน Trigger ของ MySQL?</span></p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q12" value="a"><span class="key">A</span><span><code>IF ... THEN ... END IF;</code></span></label>
+            <label class="option"><input type="radio" name="q12" value="b"><span class="key">B</span><span><code>SIGNAL SQLSTATE '45000';</code></span></label>
+            <label class="option"><input type="radio" name="q12" value="c"><span class="key">C</span><span><code>COMMIT;</code></span></label>
+            <label class="option"><input type="radio" name="q12" value="d"><span class="key">D</span><span><code>UPDATE</code> ตารางอื่น</span></label>
+          </div>
+          <div class="explain"><strong>เฉลย C:</strong> Trigger ห้ามใช้คำสั่งควบคุม transaction เช่น <code>START TRANSACTION</code>, <code>COMMIT</code>, <code>ROLLBACK</code> — แต่ใช้ IF, SIGNAL และ UPDATE ตารางอื่นได้</div>
+        </div>
+
+        <div class="quiz-result" id="quizResult" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- ===== 06 TRAPS ===== -->
+    <section class="section" id="traps">
+      <div class="section-head">
+        <div class="section-num">06</div>
+        <div>
+          <p class="kicker">ก่อนส่งข้อสอบ</p>
+          <h2>รวมจุดออกสอบและกับดักที่ต้องเช็ก</h2>
+          <p class="section-sub">ส่วนนี้คือ “รายการตรวจสอบสุดท้าย” — อ่านก่อนเข้าห้องสอบ 10 นาที จะช่วยลดความผิดพลาดที่เกิดจากการเรียงเงื่อนไขผิด ลืม ELSE หรือเลือก BEFORE/AFTER ผิด</p>
+        </div>
+      </div>
+
+      <h3>6.1 12 กับดักที่เจอบ่อย</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">#</th><th>กับดัก</th><th>อาการ</th><th>วิธีที่ถูก</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td>เรียงเงื่อนไขกว้างก่อน</td><td>คะแนน 90 ได้ Pass แทน A</td><td>เรียงเงื่อนไขเฉพาะ/ค่ามากก่อน</td></tr>
+            <tr><td class="num">2</td><td>ลืม ELSE</td><td>ค่าที่ไม่เข้าเงื่อนไขกลายเป็น NULL</td><td>ใส่ ELSE เมื่อต้องการค่า default</td></tr>
+            <tr><td class="num">3</td><td>UPDATE ไม่มี WHERE</td><td>กระทบทุกแถว</td><td>SELECT ตรวจก่อน + ใส่ WHERE</td></tr>
+            <tr><td class="num">4</td><td>ใช้ alias ใน WHERE</td><td>Unknown column</td><td>เขียน expression ซ้ำ หรือใช้ subquery</td></tr>
+            <tr><td class="num">5</td><td>ใช้ <code>= NULL</code></td><td>หาไม่เจอ</td><td>ใช้ <code>IS NULL</code></td></tr>
+            <tr><td class="num">6</td><td>ใช้ AFTER ในการ validate</td><td>ข้อมูลถูกเขียนก่อนแล้วค่อย rollback</td><td>ใช้ BEFORE + SIGNAL</td></tr>
+            <tr><td class="num">7</td><td>ใช้ NEW ใน DELETE หรือ OLD ใน INSERT</td><td>Error / ค่าไม่ถูก</td><td>INSERT ใช้ NEW, DELETE ใช้ OLD</td></tr>
+            <tr><td class="num">8</td><td>พยายาม SET NEW ใน AFTER</td><td>แก้ค่าไม่ได้</td><td>แก้ NEW ใน BEFORE เท่านั้น</td></tr>
+            <tr><td class="num">9</td><td>Trigger แก้ตารางตัวเอง</td><td>Error 1442</td><td>แก้ตารางอื่น หรือออกแบบใหม่</td></tr>
+            <tr><td class="num">10</td><td>ลืม DELIMITER</td><td>Syntax error ตรง <code>;</code> ภายใน BEGIN</td><td>ใช้ <code>DELIMITER //</code> แล้วคืนค่า</td></tr>
+            <tr><td class="num">11</td><td>Audit ซ้ำจากหลาย Trigger</td><td>ได้ 2 แถวต่อ order</td><td>แยกหน้าที่ให้ชัด หรือรวมเป็น Trigger เดียว</td></tr>
+            <tr><td class="num">12</td><td>คิดว่า Trigger อัปเดตทุกอย่างให้อัตโนมัติ</td><td>ยอด order ไม่เปลี่ยน, สต็อกติดลบ</td><td>Trigger ทำเฉพาะที่เขียน — ต้องออกแบบกฎให้ครบ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>6.2 ถาม–ตอบสั้น ทบทวนก่อนสอบ</h3>
+      <div class="practice-toolbar">
+        <span class="pt-label">ลองตอบในใจก่อนเปิดคำตอบ</span>
+        <div class="pt-actions">
+          <button class="btn btn-light btn-sm" type="button" data-answer-action="open">เปิดทั้งหมด</button>
+          <button class="btn btn-light btn-sm" type="button" data-answer-action="close">ปิดทั้งหมด</button>
+        </div>
+      </div>
+
+      <details class="qa">
+        <summary>CASE WHEN คืออะไร และใช้ที่ไหนได้บ้าง?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;">เป็น expression ที่ใช้เขียนเงื่อนไขแบบ “ถ้า…แล้ว…ไม่งั้น…” และคืนค่าเดียว ใช้ได้ใน <code>SELECT</code>, <code>ORDER BY</code>, <code>UPDATE ... SET</code>, <code>INSERT ... VALUES</code> และภายใน Trigger</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>CASE ตรวจเงื่อนไขอย่างไร?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;">ตรวจจากบนลงล่าง และหยุดที่เงื่อนไขแรกที่เป็นจริง — เงื่อนไขที่อยู่หลังจะไม่ถูกตรวจอีก ดังนั้นเงื่อนไขที่เฉพาะกว่าหรือสำคัญกว่าต้องอยู่ก่อน</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>ถ้า CASE ไม่มี ELSE และไม่มีเงื่อนไขใดเป็นจริง จะได้อะไร?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;">ได้ <code>NULL</code> — ไม่ใช่ 0 และไม่ใช่ข้อความว่าง</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>ทำไมเงื่อนไขช่วงคะแนนต้องเรียงจากมากไปน้อย?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;">เพราะถ้าเอาเงื่อนไขกว้าง เช่น <code>&gt;= 50</code> ไว้ก่อน คะแนน 90 จะ match เงื่อนไขนั้นทันทีและไม่ได้ตรวจ <code>&gt;= 80</code> อีก</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>CASE ใช้ใน ORDER BY อย่างไร?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;">ใช้แปลงสถานะเป็นตัวเลขลำดับ เช่น URGENT = 1, WAITING = 2, DONE = 3 แล้วเรียงด้วยตัวเลขนั้น จากนั้นใส่ตัวเรียงรองเช่น <code>order_date DESC</code></p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>CASE ใช้กับ aggregate ได้ไหม?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;">ได้ เช่น <code>SUM(CASE WHEN status = 'DONE' THEN total_amount ELSE 0 END)</code> หรือ <code>COUNT(CASE WHEN status = 'URGENT' THEN 1 END)</code> — เป็น pattern ทำรายงานแบบมีเงื่อนไข</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>Trigger คืออะไร?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;">ชุดคำสั่งที่ฐานข้อมูลเรียกให้เองเมื่อเกิด <code>INSERT</code>, <code>UPDATE</code> หรือ <code>DELETE</code> บนตาราง — ไม่ต้อง CALL เหมือน stored procedure</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>BEFORE กับ AFTER ต่างกันอย่างไร?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;"><code>BEFORE</code> ทำงานก่อนแถวถูกเขียน — เหมาะกับ validate และแก้ไข <code>NEW</code>; <code>AFTER</code> ทำงานหลังแถวถูกเขียน — เหมาะกับ audit, cascade และใช้ค่า AUTO_INCREMENT</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>NEW กับ OLD ใช้ต่างกันอย่างไร?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;"><code>NEW</code> = ข้อมูลแถวใหม่ ใช้กับ INSERT และ UPDATE; <code>OLD</code> = ข้อมูลแถวเดิม ใช้กับ UPDATE และ DELETE; <code>OLD</code> อ่านได้อย่างเดียว ส่วน <code>NEW</code> แก้ได้เฉพาะ BEFORE trigger</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>ทำไมต้องใช้ DELIMITER?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;">เพราะ body ของ Trigger มีเครื่องหมาย <code>;</code> หลายตัว ถ้าไม่เปลี่ยน delimiter client จะตัดจบคำสั่งตั้งแต่ <code>;</code> ตัวแรกภายใน <code>BEGIN ... END</code></p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>Trigger ตรวจสอบข้อมูลควรใช้ BEFORE หรือ AFTER?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;"><strong>BEFORE</strong> — เพื่อปฏิเสธข้อมูลผิดก่อนถูกเขียนลงตาราง และใช้ <code>SIGNAL</code> เพื่อยกเลิก statement</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>Trigger สามารถแก้ตารางที่ตัวเองผูกอยู่ได้ไหม?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;">ไม่ได้ — จะเกิด <code>ERROR 1442</code> เพราะตารางถูกใช้โดย statement ที่เรียก Trigger อยู่ แต่แก้ตารางอื่นได้ เช่น Trigger บน <code>orders</code> อัปเดต <code>customers</code></p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>SIGNAL SQLSTATE '45000' คืออะไร?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;">การส่ง error ที่ผู้ใช้กำหนดเอง โดย <code>45000</code> เป็น unhandled user-defined exception และสามารถกำหนด <code>MESSAGE_TEXT</code> เป็นข้อความที่ต้องการให้ client เห็น</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>จะดู Trigger ที่มีอยู่ได้อย่างไร?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;">ใช้ <code>SHOW TRIGGERS;</code>, <code>SHOW CREATE TRIGGER ชื่อ;</code> หรือ query จาก <code>information_schema.TRIGGERS</code></p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>CASE WHEN ภายใน Trigger ใช้ทำอะไร?</summary>
+        <div class="answer-body">
+          <p style="margin-top:1rem;">ใช้จัดระดับหรืออัปเดตสถานะอัตโนมัติ เช่น คำนวณ <code>customer_level</code> จากยอดซื้อสะสมหลังมี order ใหม่</p>
+        </div>
+      </details>
+
+      <h3>6.3 Cheat Sheet หนึ่งหน้า</h3>
+      <div class="grid-2">
+        <div class="code-block" style="margin-top:0;">
+          <div class="code-head"><span class="code-lang">CASE</span><span class="code-title">template</span><button class="copy-btn" type="button">คัดลอก</button></div>
+          <pre><code>CASE
+  WHEN condition_1 THEN result_1
+  WHEN condition_2 THEN result_2
+  ELSE result_default
+END</code></pre>
+        </div>
+        <div class="code-block" style="margin-top:0;">
+          <div class="code-head"><span class="code-lang">TRIGGER</span><span class="code-title">template</span><button class="copy-btn" type="button">คัดลอก</button></div>
+          <pre><code>DELIMITER //
+
+CREATE TRIGGER trg_name
+BEFORE INSERT ON table_name
+FOR EACH ROW
+BEGIN
+  -- logic
+END//
+
+DELIMITER ;</code></pre>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <article class="card">
+          <h4>กฎ CASE 5 ข้อ</h4>
+          <ol>
+            <li>ตรวจบนลงล่าง หยุดที่จริงตัวแรก</li>
+            <li>เงื่อนไขเฉพาะ/ค่ามากไว้ก่อน</li>
+            <li>ไม่มี ELSE = NULL</li>
+            <li>ปิดด้วย <code>END</code> (expression)</li>
+            <li>ทุก branch ควรคืนชนิดเดียวกัน</li>
+          </ol>
+        </article>
+        <article class="card teal">
+          <h4>กฎ Trigger 5 ข้อ</h4>
+          <ol>
+            <li>หนึ่ง Trigger = หนึ่ง timing + หนึ่ง event</li>
+            <li>Validate ใช้ BEFORE + SIGNAL</li>
+            <li>Audit/cascade ใช้ AFTER</li>
+            <li>INSERT ใช้ NEW, DELETE ใช้ OLD, UPDATE ใช้ทั้งคู่</li>
+            <li>ห้ามแก้ตารางตัวเอง (1442)</li>
+          </ol>
+        </article>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Event</th><th><code>OLD</code></th><th><code>NEW</code></th><th>Timing ที่แนะนำ</th></tr></thead>
+          <tbody>
+            <tr><td>INSERT</td><td>—</td><td>✓</td><td>BEFORE เพื่อ validate; AFTER เพื่อ audit/ใช้ ID</td></tr>
+            <tr><td>UPDATE</td><td>✓</td><td>✓</td><td>BEFORE เพื่อ validate; AFTER เพื่อ log old/new</td></tr>
+            <tr><td>DELETE</td><td>✓</td><td>—</td><td>BEFORE เพื่อตรวจ; AFTER เพื่อ archive</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>6.4 คำศัพท์ที่ควรตอบได้</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>คำศัพท์</th><th>ความหมายสั้น ๆ</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">DML</td><td>คำสั่งจัดการข้อมูล: SELECT, INSERT, UPDATE, DELETE</td></tr>
+            <tr><td class="mono">CASE expression</td><td>นิพจน์เงื่อนไขที่คืนค่า ใช้ใน query</td></tr>
+            <tr><td class="mono">Searched CASE</td><td>CASE ที่แต่ละ WHEN มีเงื่อนไขของตัวเอง</td></tr>
+            <tr><td class="mono">Simple CASE</td><td>CASE ที่เปรียบเทียบค่ากับ WHEN แบบเท่ากับ</td></tr>
+            <tr><td class="mono">Trigger</td><td>ชุดคำสั่งที่ทำงานอัตโนมัติเมื่อเกิด DML</td></tr>
+            <tr><td class="mono">Timing</td><td>BEFORE หรือ AFTER</td></tr>
+            <tr><td class="mono">Event</td><td>INSERT, UPDATE หรือ DELETE</td></tr>
+            <tr><td class="mono">Row-level</td><td>ทำงานทีละแถว (FOR EACH ROW)</td></tr>
+            <tr><td class="mono">NEW / OLD</td><td>Alias ของแถวใหม่ / แถวเดิมใน Trigger</td></tr>
+            <tr><td class="mono">DELIMITER</td><td>คำสั่งฝั่ง client ใช้เปลี่ยนตัวคั่นคำสั่งชั่วคราว</td></tr>
+            <tr><td class="mono">SIGNAL</td><td>คำสั่งโยน error ที่ผู้ใช้กำหนด</td></tr>
+            <tr><td class="mono">SQLSTATE</td><td>รหัสสถานะมาตรฐานของ error เช่น 45000</td></tr>
+            <tr><td class="mono">Audit log</td><td>ตารางบันทึกประวัติการเปลี่ยนแปลง</td></tr>
+            <tr><td class="mono">Cascading trigger</td><td>Trigger หนึ่งทำให้ Trigger อีกตัวทำงานต่อ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="memory-box">
+        <h4>ก่อนเข้าห้องสอบ 60 วินาที</h4>
+        <ul style="margin-bottom:0;">
+          <li>เห็น CASE → เช็กลำดับ WHEN และ ELSE</li>
+          <li>เห็น Trigger → เช็ก timing, event, NEW/OLD</li>
+          <li>เห็น UPDATE → เช็ก WHERE</li>
+          <li>เห็น validation → คิดถึง BEFORE + SIGNAL</li>
+          <li>เห็น audit → คิดถึง AFTER + log table</li>
+          <li>เห็น error 1442 → จำว่า Trigger แก้ตารางตัวเองไม่ได้</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== 07 RECAP ===== -->
+    <section class="section" id="recap">
+      <div class="section-head">
+        <div class="section-num">07</div>
+        <div>
+          <p class="kicker">สรุปท้ายบท</p>
+          <h2>อ่านจบแล้ว จำ 10 อย่างนี้ได้ไหม</h2>
+          <p class="section-sub">ถ้าอธิบายทั้ง 10 ข้อได้โดยไม่เปิดหน้านี้ ถือว่าพร้อมสำหรับข้อสอบทั้งภาคทฤษฎีและภาคปฏิบัติ</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <article class="card"><div class="card-icon">01</div><h4>CASE เป็น expression</h4><p>มันคืนค่า ไม่ได้เปลี่ยนข้อมูลเอง — ใช้ใน SELECT, ORDER BY, UPDATE, Trigger</p></article>
+        <article class="card teal"><div class="card-icon">02</div><h4>ตรวจบนลงล่าง</h4><p>หยุดที่เงื่อนไขแรกที่เป็นจริง ลำดับ WHEN จึงมีผลต่อผลลัพธ์</p></article>
+        <article class="card amber"><div class="card-icon">03</div><h4>ไม่มี ELSE = NULL</h4><p>ถ้าต้องการค่า default ต้องใส่ ELSE และระวัง NULL ในเงื่อนไข</p></article>
+        <article class="card rose"><div class="card-icon">04</div><h4>CASE ใช้เรียงลำดับได้</h4><p>แปลงสถานะเป็นตัวเลขแล้ว ORDER BY CASE ... END + ตัวเรียงรอง</p></article>
+        <article class="card"><div class="card-icon">05</div><h4>Trigger ทำงานอัตโนมัติ</h4><p>เมื่อมี INSERT, UPDATE หรือ DELETE — ไม่ต้อง CALL และไม่ทำงานกับ SELECT</p></article>
+        <article class="card teal"><div class="card-icon">06</div><h4>BEFORE vs AFTER</h4><p>BEFORE = validate/แก้ NEW; AFTER = audit/cascade/ใช้ค่า ID จริง</p></article>
+        <article class="card amber"><div class="card-icon">07</div><h4>NEW / OLD</h4><p>INSERT ใช้ NEW, DELETE ใช้ OLD, UPDATE ใช้ทั้งคู่; OLD อ่านอย่างเดียว</p></article>
+        <article class="card rose"><div class="card-icon">08</div><h4>Validation + SIGNAL</h4><p>ใช้ BEFORE ร่วมกับ <code>SIGNAL SQLSTATE '45000'</code> เพื่อปฏิเสธข้อมูลผิด</p></article>
+        <article class="card"><div class="card-icon">09</div><h4>DELIMITER</h4><p>เปลี่ยนตัวคั่นชั่วคราวเพราะ body มี <code>;</code> หลายตัว อย่าลืมคืนค่าเป็น <code>;</code></p></article>
+        <article class="card teal"><div class="card-icon">10</div><h4>ข้อจำกัดของ Trigger</h4><p>ห้ามแก้ตารางตัวเอง (1442), ห้าม COMMIT/ROLLBACK, ห้าม dynamic SQL, ไม่คืน result set</p></article>
+      </div>
+
+      <h3>เช็กความพร้อมของตัวเอง</h3>
+      <p>ติ๊กข้อที่คุณอธิบายได้โดยไม่ดูเฉลย — เป้าหมายคือ 10/10</p>
+      <div class="checklist" id="selfCheck">
+        <label class="check"><input type="checkbox"><span>อธิบายได้ว่า CASE เป็น expression และใช้ที่ไหนได้บ้าง</span></label>
+        <label class="check"><input type="checkbox"><span>บอกได้ว่า CASE ประเมินเงื่อนไขอย่างไร และทำไมลำดับจึงสำคัญ</span></label>
+        <label class="check"><input type="checkbox"><span>เขียน CASE แปลงคะแนนเป็นเกรดได้โดยไม่ลืม ELSE</span></label>
+        <label class="check"><input type="checkbox"><span>เขียน CASE ใน ORDER BY เพื่อจัดลำดับธุรกิจได้</span></label>
+        <label class="check"><input type="checkbox"><span>อธิบาย BEFORE กับ AFTER และเลือกใช้ตามสถานการณ์ได้</span></label>
+        <label class="check"><input type="checkbox"><span>บอกได้ว่า INSERT/UPDATE/DELETE ใช้ NEW/OLD ตัวไหน</span></label>
+        <label class="check"><input type="checkbox"><span>เขียน Trigger บันทึก audit log ได้</span></label>
+        <label class="check"><input type="checkbox"><span>เขียน Trigger validation ด้วย SIGNAL ได้</span></label>
+        <label class="check"><input type="checkbox"><span>เขียน Trigger ลดสต็อกและอัปเดตยอดลูกค้าได้</span></label>
+        <label class="check"><input type="checkbox"><span>บอกข้อจำกัดของ Trigger และวิธีดู/ลบ Trigger ได้</span></label>
+      </div>
+      <p style="margin-top:.8rem;">ทำได้แล้ว <strong id="checkCount">0/10</strong> ข้อ</p>
+
+      <div class="callout success">
+        <div class="ci">✓</div>
+        <div>
+          <strong>โจทย์ต่อยอด (ลองออกแบบเอง):</strong> ระบบห้องสมุดมีตาราง <code>books(book_id, title, available_copies)</code> และ <code>borrow(borrow_id, book_id, quantity)</code> — ลองออกแบบ Trigger 3 ตัว:
+          <ol style="margin-bottom:0;">
+            <li><code>BEFORE INSERT</code> บน <code>borrow</code> เพื่อตรวจว่ายังมีหนังสือพอ</li>
+            <li><code>AFTER INSERT</code> บน <code>borrow</code> เพื่อลด <code>available_copies</code></li>
+            <li><code>AFTER UPDATE</code> บน <code>books</code> เพื่อบันทึก log การเปลี่ยนจำนวน</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="memory-box" style="text-align:center;">
+        <h4 style="margin-bottom:.4rem;">พร้อมสอบแล้วหรือยัง?</h4>
+        <p style="margin-bottom:1rem;">ถ้าทำ Quiz ได้ 10/12 ขึ้นไป และติ๊กเช็กได้ 10/10 — อ่านจบแล้ว คุณพร้อมสำหรับโจทย์ CASE WHEN และ Trigger ในข้อสอบ</p>
+        <button class="btn btn-primary" type="button" data-print><span aria-hidden="true">🖨</span> พิมพ์ cheat sheet เก็บไว้อ่าน</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>
+      <p><strong>SQL: CASE WHEN &amp; Trigger — Exam Study Notes</strong></p>
+      <p>เรียบเรียงจากสไลด์ Week 9 (22 หน้า) และไฟล์แล็บ <code>sql_case_when_trigger_lab_data.sql</code></p>
+    </div>
+    <div>
+      <p>ใช้สำหรับทบทวนก่อนสอบ · ทดสอบโค้ดในฐานข้อมูลจำลองเท่านั้น</p>
+      <p><a href="#main">กลับขึ้นด้านบน</a></p>
+    </div>
+  </div>
+</footer>
+
+<div class="floating-tools">
+  <button class="tool-btn" type="button" id="themeBtn" aria-label="สลับโหมดมืดและสว่าง" title="สลับโหมดมืด/สว่าง"><span class="theme-dot" aria-hidden="true"></span></button>
+  <button class="tool-btn" type="button" id="backTop" aria-label="กลับขึ้นด้านบน" title="กลับขึ้นด้านบน">↑</button>
+</div>
+
+<script>
+  // ===== Utilities =====
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function dedent(text) {
+    const normalized = text.replace(/\r\n/g, '\n').replace(/^\n+|\n+$/g, '');
+    const lines = normalized.split('\n');
+    const indents = lines.filter(line => line.trim()).map(line => (line.match(/^[ \t]*/) || [''])[0].length);
+    const minIndent = indents.length ? Math.min(...indents) : 0;
+    return lines.map(line => line.slice(minIndent)).join('\n');
+  }
+
+  // ===== SQL syntax highlight =====
+  const KEYWORDS = new Set([
+    'SELECT','FROM','WHERE','INSERT','INTO','VALUES','UPDATE','SET','DELETE','CREATE','TABLE','TRIGGER',
+    'BEFORE','AFTER','ON','FOR','EACH','ROW','BEGIN','END','IF','THEN','ELSE','ELSEIF','CASE','WHEN',
+    'DELIMITER','DECLARE','SIGNAL','SQLSTATE','MESSAGE_TEXT','AS','AND','OR','NOT','NULL','IS','IN',
+    'BETWEEN','LIKE','ORDER','BY','GROUP','HAVING','LIMIT','JOIN','LEFT','RIGHT','INNER','OUTER',
+    'DISTINCT','PRIMARY','KEY','FOREIGN','REFERENCES','CONSTRAINT','DEFAULT','INT','VARCHAR','DECIMAL',
+    'DATETIME','DATE','DROP','SHOW','TRIGGERS','DATABASE','USE','CHARACTER','COLLATE','ENGINE','INNODB',
+    'EXISTS','DESC','ASC','AUTO_INCREMENT','CURRENT_TIMESTAMP','START','TRANSACTION','COMMIT','ROLLBACK',
+    'PREPARE','EXECUTE','DEALLOCATE','CALL','PROCEDURE','FUNCTION','RETURN','RETURNS','LOOP','WHILE',
+    'REPEAT','UNTIL','LEAVE','ITERATE','HANDLER','CONTINUE','EXIT','UNDO','RESIGNAL','CONDITION'
+  ]);
+  const FUNCTIONS = new Set([
+    'NOW','SUM','COUNT','AVG','MIN','MAX','CONCAT','COALESCE','IFNULL','CURDATE','CURRENT_DATE',
+    'LAST_INSERT_ID','ROW_COUNT','CAST','CONVERT','ROUND','ABS','LENGTH','UPPER','LOWER','TRIM',
+    'SUBSTRING','YEAR','MONTH','DAY'
+  ]);
+
+  const tokenPattern = /(--[^\n]*|\/\*[\s\S]*?\*\/|'(?:''|[^'])*'|"(?:[^"\\]|\\.)*"|\b(?:NEW|OLD)\b|\b(?:SELECT|FROM|WHERE|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|TRIGGER|BEFORE|AFTER|ON|FOR|EACH|ROW|BEGIN|END|IF|THEN|ELSE|ELSEIF|CASE|WHEN|DELIMITER|DECLARE|SIGNAL|SQLSTATE|MESSAGE_TEXT|AS|AND|OR|NOT|NULL|IS|IN|BETWEEN|LIKE|ORDER|BY|GROUP|HAVING|LIMIT|JOIN|LEFT|RIGHT|INNER|OUTER|DISTINCT|PRIMARY|KEY|FOREIGN|REFERENCES|CONSTRAINT|DEFAULT|INT|VARCHAR|DECIMAL|DATETIME|DATE|DROP|SHOW|TRIGGERS|DATABASE|USE|CHARACTER|COLLATE|ENGINE|INNODB|EXISTS|DESC|ASC|AUTO_INCREMENT|CURRENT_TIMESTAMP|START|TRANSACTION|COMMIT|ROLLBACK|PREPARE|EXECUTE|DEALLOCATE|CALL|PROCEDURE|FUNCTION|RETURN|RETURNS|LOOP|WHILE|REPEAT|UNTIL|LEAVE|ITERATE|HANDLER|CONTINUE|EXIT|UNDO|RESIGNAL|CONDITION)\b|\b(?:NOW|SUM|COUNT|AVG|MIN|MAX|CONCAT|COALESCE|IFNULL|CURDATE|CURRENT_DATE|LAST_INSERT_ID|ROW_COUNT|CAST|CONVERT|ROUND|ABS|LENGTH|UPPER|LOWER|TRIM|SUBSTRING|YEAR|MONTH|DAY)\b|\b\d+(?:\.\d+)?\b)/gi;
+
+  function highlightSQL(sql) {
+    let out = '';
+    let lastIndex = 0;
+    for (const match of sql.matchAll(tokenPattern)) {
+      const token = match[0];
+      out += escapeHtml(sql.slice(lastIndex, match.index));
+      let cls = 'tok-kw';
+      if (token.startsWith('--') || token.startsWith('/*')) cls = 'tok-com';
+      else if (token.startsWith("'") || token.startsWith('"')) cls = 'tok-str';
+      else if (/^\d/.test(token)) cls = 'tok-num';
+      else if (/^(NEW|OLD)$/i.test(token)) cls = 'tok-row';
+      else if (FUNCTIONS.has(token.toUpperCase())) cls = 'tok-fn';
+      else if (KEYWORDS.has(token.toUpperCase())) cls = 'tok-kw';
+      out += `<span class="${cls}">${escapeHtml(token)}</span>`;
+      lastIndex = match.index + token.length;
+    }
+    out += escapeHtml(sql.slice(lastIndex));
+    return out;
+  }
+
+  $$('pre code').forEach(code => {
+    const raw = dedent(code.textContent);
+    code.dataset.raw = raw;
+    code.innerHTML = highlightSQL(raw);
+  });
+
+  // ===== Copy buttons =====
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-9999px';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    if (!ok) throw new Error('execCommand copy failed');
+  }
+
+  async function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return;
+      } catch (err) {
+        // Some browsers expose Clipboard API but deny it in embedded/headless contexts.
+      }
+    }
+    fallbackCopy(text);
+  }
+
+  $$('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const block = btn.closest('.code-block');
+      const code = block ? $('code', block) : null;
+      const text = code ? (code.dataset.raw || code.textContent || '') : '';
+      if (!text) return;
+
+      const original = btn.textContent;
+      try {
+        await copyText(text);
+        btn.textContent = 'คัดลอกแล้ว ✓';
+        btn.classList.add('copied');
+      } catch (err) {
+        btn.textContent = 'คัดลอกไม่ได้';
+      }
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.classList.remove('copied');
+      }, 1600);
+    });
+  });
+
+  // ===== Theme =====
+  const root = document.documentElement;
+  const themeBtn = $('#themeBtn');
+  let savedTheme = null;
+  try { savedTheme = localStorage.getItem('sql-study-theme'); } catch (err) { /* storage may be unavailable */ }
+  if (savedTheme === 'dark' || savedTheme === 'light') {
+    root.dataset.theme = savedTheme;
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    root.dataset.theme = 'dark';
+  }
+  themeBtn.addEventListener('click', () => {
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try { localStorage.setItem('sql-study-theme', next); } catch (err) { /* ignore storage errors */ }
+    themeBtn.setAttribute('aria-label', next === 'dark' ? 'สลับเป็นโหมดสว่าง' : 'สลับเป็นโหมดมืด');
+    themeBtn.title = next === 'dark' ? 'สลับเป็นโหมดสว่าง' : 'สลับเป็นโหมดมืด';
+  });
+
+  // ===== Reading progress / back to top =====
+  const progress = $('#readingProgress');
+  const readPercent = $('#readPercent');
+  const backTop = $('#backTop');
+  let ticking = false;
+
+  function updateProgress() {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = height > 0 ? Math.min(100, Math.max(0, (scrollTop / height) * 100)) : 0;
+    progress.style.width = pct + '%';
+    readPercent.textContent = Math.round(pct) + '%';
+    backTop.classList.toggle('show', scrollTop > 650);
+    ticking = false;
+  }
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(updateProgress);
+      ticking = true;
+    }
+  }, { passive: true });
+  updateProgress();
+
+  backTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ===== TOC active link =====
+  const tocLinks = new Map($$('.toc a').map(link => [link.getAttribute('href').slice(1), link]));
+  const sections = $$('main .section');
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        tocLinks.forEach(link => link.classList.remove('active'));
+        const active = tocLinks.get(entry.target.id);
+        if (active) active.classList.add('active');
+      });
+    }, { rootMargin: '-12% 0px -72% 0px', threshold: 0 });
+    sections.forEach(section => observer.observe(section));
+  }
+
+  // ===== Open / close all answers =====
+  $$('[data-answer-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.answerAction;
+      $$('details.answer, details.qa').forEach(details => {
+        details.open = action === 'open';
+      });
+    });
+  });
+
+  // ===== Quiz =====
+  const quiz = $('#quiz');
+  if (quiz) {
+    const questions = $$('.question', quiz);
+    const resultBox = $('#quizResult');
+    const checkBtn = $('#checkQuiz');
+    const resetBtn = $('#resetQuiz');
+
+    checkBtn.addEventListener('click', () => {
+      let score = 0;
+      let answered = 0;
+
+      questions.forEach(question => {
+        const correct = question.dataset.answer;
+        const selected = $('input[type="radio"]:checked', question);
+        question.classList.remove('correct', 'wrong', 'show-explain', 'unanswered');
+        $$('.option', question).forEach(option => option.classList.remove('correct', 'wrong'));
+
+        if (!selected) {
+          question.classList.add('unanswered', 'show-explain');
+          return;
+        }
+
+        answered += 1;
+        const selectedOption = selected.closest('.option');
+        if (selected.value === correct) {
+          score += 1;
+          question.classList.add('correct');
+          selectedOption.classList.add('correct');
+        } else {
+          question.classList.add('wrong');
+          selectedOption.classList.add('wrong');
+          const correctInput = $(`input[value="${correct}"]`, question);
+          if (correctInput) correctInput.closest('.option').classList.add('correct');
+        }
+        question.classList.add('show-explain');
+      });
+
+      resultBox.className = 'quiz-result show ' + (score >= 10 ? 'good' : score >= 6 ? 'mid' : 'bad');
+      resultBox.innerHTML = `ได้ <strong>${score}/${questions.length}</strong> คะแนน · ตอบแล้ว ${answered} ข้อ<br>` +
+        (score >= 10 ? 'พร้อมสอบมาก! ทบทวนจุดพลาดอีกนิดแล้วลุยได้เลย' :
+         score >= 6 ? 'ผ่านเกณฑ์ แต่ควรกลับไปอ่าน NEW/OLD กับ BEFORE/AFTER ซ้ำ' :
+         'ยังไม่แน่น กลับไปอ่านหัวข้อ 02–03 แล้วลองใหม่ได้เลย');
+    });
+
+    resetBtn.addEventListener('click', () => {
+      questions.forEach(question => {
+        question.classList.remove('correct', 'wrong', 'show-explain', 'unanswered');
+        $$('.option', question).forEach(option => option.classList.remove('correct', 'wrong'));
+        $$('input[type="radio"]', question).forEach(input => { input.checked = false; });
+      });
+      resultBox.className = 'quiz-result';
+      resultBox.innerHTML = '';
+      quiz.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  // ===== Self-check checklist =====
+  const selfCheck = $('#selfCheck');
+  if (selfCheck) {
+    const checkboxes = $$('input[type="checkbox"]', selfCheck);
+    const count = $('#checkCount');
+    const refresh = () => {
+      const done = checkboxes.filter(box => box.checked).length;
+      count.textContent = `${done}/${checkboxes.length}`;
+    };
+    checkboxes.forEach(box => box.addEventListener('change', refresh));
+    refresh();
+  }
+
+  // ===== Print =====
+  let printState = [];
+  window.addEventListener('beforeprint', () => {
+    printState = $$('details').map(details => details.open);
+    $$('details').forEach(details => { details.open = true; });
+  });
+  window.addEventListener('afterprint', () => {
+    $$('details').forEach((details, index) => {
+      details.open = printState[index] ?? false;
+    });
+  });
+  $$('[data-print]').forEach(btn => {
+    btn.addEventListener('click', () => window.print());
+  });
+</script>
+</body>
+</html>
